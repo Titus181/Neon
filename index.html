@@ -513,12 +513,25 @@
         }
         function openVisualBox(boxElem, index, val) {
             if (document.getElementById("modalCloseBtn").style.display === "block") return;
+            
             document.querySelectorAll('.mystery-box').forEach((box, idx) => {
-                box.classList.add('opened'); box.innerText = activeRoundData.boxChoices[idx] + "x";
+                box.classList.add('opened'); 
+                
+                // 【修改點 1】：寶箱畫面上顯示不含本金的淨倍率 (-1)
+                let displayMultiplier = activeRoundData.boxChoices[idx] - 1;
+                box.innerText = displayMultiplier + "x";
+                
                 if (idx === index) box.classList.add('winner');
             });
-            stats.wins[4] += val; updateStatsTable();
-            logMessage(formatText('msgBoxResult', val), 'highlight-win');
+            
+            // 實際結算依然使用 val (含本金的數值) 加入統計
+            stats.wins[4] += val; 
+            updateStatsTable();
+            
+            // 【修改點 2】：遊戲日誌中也顯示不含本金的淨倍率 (-1)
+            let selectedDisplayMultiplier = val - 1;
+            logMessage(formatText('msgBoxResult', selectedDisplayMultiplier), 'highlight-win');
+            
             document.getElementById("modalCloseBtn").style.display = "block";
         }
         function closeMysteryModal() { document.getElementById("mysteryModal").style.display = "none"; setButtonsDisabled(false); }
