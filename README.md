@@ -1,3 +1,78 @@
+# 🎰 Neon Spin Simulator & Math Model
+
+Welcome to the **Neon Spin** project! This repository contains the frontend visual simulator, the core math model design, and the Monte Carlo simulation results for a fast-paced lucky wheel game show.
+
+### 🔗 Quick Links
+* **[🎮 Play the Online Simulator](https://titus181.github.io/Neon/)**
+* **[📊 Math Model Google Spreadsheet](https://docs.google.com/spreadsheets/d/1joYiLXAZEIoLnz15BvJ5dMqdYvYzuejGCUUPQYa6cIo/edit?gid=0#gid=0)**
+
+---
+
+## 📖 Game Rules
+
+### 1. Game Overview
+Neon Spin is a simple, fast-paced lucky wheel game show. The wheel consists of **54 segments**, featuring 4 different numbers and a special "Mystery Box" segment.
+
+### 2. How to Play
+Players can place their bets on 5 available options: `Number 1`, `Number 2`, `Number 5`, `Number 10`, or the `Mystery Box`. Once betting time is over, the presenter will spin the lucky wheel.
+
+### 3. Lucky Multipliers
+Before the wheel is spun, extra random multipliers are drawn and distributed to **1 or 2 regular segments** each game round.
+If the wheel stops on a segment with a multiplier, this enhanced multiplier will **replace** the standard payout value for the selected number.
+* **[Upgrade Guarantee]**: The applied lucky multiplier will ALWAYS be strictly higher than the base payout of that segment! For instance, if a multiplier lands on Number 10, it is guaranteed to be 15x or higher, ensuring a much bigger win!
+* **Note**: Random multipliers do not apply to the Mystery Box segment.
+
+### 4. Mystery Box Bonus
+Triggered when the wheel stops on the Mystery Box segment. Every player with a valid bet on the Mystery Box in the current game round is eligible to take part.
+**3 chests** will appear on the screen. Players have 5 seconds to pick 1 chest of their choice. If a player misses the selection time, the system will select one box randomly on their behalf. Each chest contains a hidden multiplier. Players will be rewarded according to the multiplier inside their chosen box.
+
+### 5. Standard Payouts
+* **Number 1**: Pays 1:1
+* **Number 2**: Pays 2:1
+* **Number 5**: Pays 5:1
+* **Number 10**: Pays 10:1
+* **Mystery Box**: Pays according to the revealed multiplier.
+
+---
+
+## 🧮 Math Model Overview
+
+The math model is designed to provide a stable Return to Player (RTP) while creating high-multiplier excitement through the Lucky Multipliers and the Mystery Box. The overall theoretical RTP is balanced between **96.44% and 96.51%**.
+
+| Bet Option | Total Return (Inc. Bet) | Segments | Hit Rate | Theoretical RTP |
+| :--- | :--- | :--- | :--- | :--- |
+| **1x** | 2 | 21 | 38.89% | 96.48% |
+| **2x** | 3 | 14 | 25.93% | 96.50% |
+| **5x** | 6 | 7 | 12.96% | 96.50% |
+| **10x** | 11 | 4 | 7.41% | 96.51% |
+| **Mystery Box** | Variable (Box Reveal) | 8 | 14.81% | 96.44% |
+
+*(For detailed Bonus weighting pools and Mystery Box probabilities, please refer to the Math Model Spreadsheet linked above.)*
+
+---
+
+## 🚀 1 Billion Rounds Simulation Results
+
+To verify the accuracy of our mathematical model and code logic, a Monte Carlo simulation of **1,000,000,000 (1 Billion) rounds** was executed. 
+
+The results show that the simulated RTP converges extremely closely with the theoretical RTP, with variance strictly within `0.04%`.
+
+```text
+🏁 All simulations completed! Total time: 3422.40 seconds
+
+--------------------------------------------------
+Bet Option       | Sim RTP      | Theo RTP     | Diff
+--------------------------------------------------
+Bet 1x           |  96.4909%    |  96.4800%    | +0.0109%
+Bet 2x           |  96.5007%    |  96.5000%    | +0.0007%
+Bet 5x           |  96.4866%    |  96.5000%    | -0.0134%
+Bet 10x          |  96.4709%    |  96.5100%    | -0.0391%
+Mystery Box      |  96.4516%    |  96.4400%    | +0.0116%
+--------------------------------------------------
+```
+
+---
+
 # 🎰 Neon Spin 模擬器與數值模型
 
 《Neon Spin》是一款簡單、快節奏的輪盤遊戲。本專案包含遊戲的純前端實境模擬器、核心數值模型（Math Model）設計，以及大樣本蒙地卡羅模擬（Monte Carlo Simulation）的驗證結果。
@@ -61,3 +136,4 @@ Bet 5x       |  96.4866% |  96.5000% | -0.0134%
 Bet 10x      |  96.4709% |  96.5100% | -0.0391%
 Mystery Box  |  96.4516% |  96.4400% | +0.0116%
 --------------------------------------------------
+```
