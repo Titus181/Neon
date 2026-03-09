@@ -466,12 +466,18 @@
             }, 300); 
         }
 
-        function executeRotation(activeBets) {
+function executeRotation(activeBets) {
             let resultIdx = Math.floor(Math.random() * 54);
             activeRoundData = { segment: wheelSegments[resultIdx], bets: activeBets };
+            
             let sliceDeg = 360 / 54;
-            let targetAngle = 360 - (resultIdx * sliceDeg);
-            let randomOffset = (Math.random() * (sliceDeg * 0.8)) - (sliceDeg * 0.4); 
+            
+            // 【修正點】：額外扣除半個區塊的角度 (sliceDeg / 2)，讓區塊正中心對齊 12 點鐘指針
+            let targetAngle = 360 - (resultIdx * sliceDeg) - (sliceDeg / 2); 
+            
+            // 隨機偏移停靠點 (範圍稍微縮小，確保指針不會太靠近邊緣產生視覺誤會)
+            let randomOffset = (Math.random() * (sliceDeg * 0.6)) - (sliceDeg * 0.3); 
+            
             let spins = 5 * 360; 
             let extraDeg = (targetAngle + randomOffset) - (currentRotation % 360);
             if (extraDeg < 0) extraDeg += 360;
