@@ -24,8 +24,25 @@
             align-items: center;
             overflow-x: hidden;
         }
-        h1 { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); text-align: center; margin-bottom: 30px; }
         
+        /* 頂部導覽區 */
+        .top-nav {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); margin: 0; }
+        .nav-buttons { display: flex; gap: 10px; }
+        .nav-btn {
+            background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
+
         .layout-container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 20px; }
         .top-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 40px; }
         
@@ -78,7 +95,7 @@
         .stats-table th, .stats-table td { border: 1px solid #333; padding: 10px; text-align: center; }
         .stats-table th { background: #2a2a4a; color: var(--neon-blue); }
 
-        /* 神秘盒 */
+        /* 通用視窗 (規則 & 神秘盒) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
         .modal-title { color: var(--neon-blue); font-size: 32px; margin-bottom: 30px; text-shadow: 0 0 15px var(--neon-blue); }
         .boxes-container { display: flex; gap: 30px; }
@@ -86,12 +103,28 @@
         .mystery-box:hover { transform: scale(1.1); }
         .mystery-box.opened { background: #222; border-color: #555; cursor: default; transform: scale(1); box-shadow: none; }
         .mystery-box.winner { border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); }
-        .close-btn { margin-top: 30px; display: none; padding: 10px 30px; background: var(--neon-blue); color: black; font-size: 18px; border: none; border-radius: 20px; cursor: pointer; }
+        .close-btn { margin-top: 30px; padding: 10px 30px; background: var(--neon-blue); color: black; font-size: 18px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        
+        /* 規則視窗內部樣式 */
+        .rules-content {
+            background: var(--panel-bg); border: 1px solid var(--neon-blue); padding: 30px;
+            border-radius: 10px; width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto;
+            color: var(--text-main); line-height: 1.6; font-size: 15px; box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+        }
+        .rules-content h2 { color: var(--neon-pink); text-align: center; margin-top: 0; }
+        .rules-content h4 { color: var(--neon-green); border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .rules-content ul { padding-left: 20px; }
     </style>
 </head>
 <body>
 
-    <h1>Neon Spin</h1>
+    <div class="top-nav">
+        <h1>Neon Spin</h1>
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="toggleLanguage()" id="langBtn">EN / 中文</button>
+            <button class="nav-btn" onclick="openRulesModal()" id="rulesBtn">📖 遊戲說明</button>
+        </div>
+    </div>
 
     <div class="layout-container">
         <div class="top-row">
@@ -103,13 +136,13 @@
             </div>
 
             <div class="right-col">
-                <h3 style="margin-top: 0; text-align: center; color: var(--neon-pink);">選擇下注目標</h3>
+                <h3 style="margin-top: 0; text-align: center; color: var(--neon-pink);" id="t_chooseBets">選擇下注目標</h3>
                 <div class="bet-section" id="bet-options">
-                    <button class="bet-btn active" data-bet="0"><span>1x</span><span class="chip">已下注</span></button>
-                    <button class="bet-btn active" data-bet="1"><span>2x</span><span class="chip">已下注</span></button>
-                    <button class="bet-btn active" data-bet="2"><span>5x</span><span class="chip">已下注</span></button>
-                    <button class="bet-btn active" data-bet="3"><span>10x</span><span class="chip">已下注</span></button>
-                    <button class="bet-btn wide active" data-bet="4"><span>Mystery Box</span><span class="chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="0"><span>1x</span><span class="chip t_chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="1"><span>2x</span><span class="chip t_chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="2"><span>5x</span><span class="chip t_chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="3"><span>10x</span><span class="chip t_chip">已下注</span></button>
+                    <button class="bet-btn wide active" data-bet="4"><span>Mystery Box</span><span class="chip t_chip">已下注</span></button>
                 </div>
                 <button class="action-btn" id="spinBtn" onclick="startVisualSpin()">🎰 單局實境轉盤 (SPIN)</button>
                 <button class="action-btn simulate" id="simBtn" onclick="runBulkSimulation(10000)">🚀 快速模擬 10,000 局</button>
@@ -118,23 +151,23 @@
 
         <div class="bottom-row">
             <div class="panel">
-                <h3>最新動態</h3>
+                <h3 id="t_logTitle">最新動態</h3>
                 <div class="log-area" id="log-output"></div>
             </div>
 
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 style="margin: 0;">RTP 統計數據 (累計)</h3>
-                    <button onclick="resetStats()" style="padding: 5px 15px; cursor: pointer; background: #333; color: white; border: 1px solid #555; border-radius: 5px;">重置統計</button>
+                    <h3 style="margin: 0;" id="t_statsTitle">RTP 統計數據 (累計)</h3>
+                    <button onclick="resetStats()" id="t_resetBtn" style="padding: 5px 15px; cursor: pointer; background: #333; color: white; border: 1px solid #555; border-radius: 5px;">重置統計</button>
                 </div>
                 <table class="stats-table">
                     <thead>
                         <tr>
-                            <th>下注選項</th>
-                            <th>總下注數</th>
-                            <th>總贏分 (含本金)</th>
-                            <th>實測 RTP</th>
-                            <th>理論 RTP</th>
+                            <th id="th_option">下注選項</th>
+                            <th id="th_bets">總下注數</th>
+                            <th id="th_wins">總贏分 (含本金)</th>
+                            <th id="th_srtp">實測 RTP</th>
+                            <th id="th_trtp">理論 RTP</th>
                         </tr>
                     </thead>
                     <tbody id="stats-body"></tbody>
@@ -144,12 +177,148 @@
     </div>
 
     <div class="modal-overlay" id="mysteryModal">
-        <div class="modal-title">🌟 觸發神秘盒！請選擇一個寶箱 🌟</div>
+        <div class="modal-title" id="t_boxTitle">🌟 觸發神秘盒！請選擇一個寶箱 🌟</div>
         <div class="boxes-container" id="boxesContainer"></div>
-        <button class="close-btn" id="modalCloseBtn" onclick="closeMysteryModal()">結算並關閉</button>
+        <button class="close-btn" id="modalCloseBtn" onclick="closeMysteryModal()" style="display: none;">結算並關閉</button>
+    </div>
+
+    <div class="modal-overlay" id="rulesModal">
+        <div class="rules-content" id="rulesContentBox">
+            </div>
+        <button class="close-btn" onclick="closeRulesModal()" id="t_rulesClose">關閉說明</button>
     </div>
 
     <script>
+        // --- 0. 語系與字典 (i18n) ---
+        let currentLang = 'zh'; // 預設中文
+        
+        const i18n = {
+            zh: {
+                btnRules: "📖 遊戲說明", chooseBets: "選擇下注目標", chip: "已下注", spin: "🎰 單局實境轉盤 (SPIN)", sim: "🚀 快速模擬 10,000 局",
+                logTitle: "最新動態", statsTitle: "RTP 統計數據 (累計)", resetBtn: "重置統計", boxTitle: "🌟 觸發神秘盒！請選擇一個寶箱 🌟", closeBox: "結算並關閉", closeRules: "關閉說明",
+                th_op: "下注選項", th_be: "總下注數", th_wi: "總贏分 (含本金)", th_srtp: "實測 RTP", th_trtp: "理論 RTP",
+                alertSelect: "請至少選擇一個下注！",
+                msgBonusFlash: "[系統] ⚡ {0} 獲得 Bonus，倍率升至 {1}x！",
+                msgWheelStop: "[輪盤] 停在 🎯 {0}{1}",
+                msgBonusSuffix: " (Bonus!)",
+                msgWin: "💰 恭喜押中，獲得賠付: {0} 單位！",
+                msgLose: "❌ 沒押中。",
+                msgBoxTrigger: "🎁 觸發神秘盒！等待選擇...",
+                msgBoxResult: "💰 神秘盒開獎！你選擇了 {0}x 的獎勵！",
+                msgSimStart: "🚀 啟動純數學模擬 {0} 局...請稍候",
+                msgSimDone: "✅ 模擬完成！統計資料已更新。",
+                msgReset: "統計資料與日誌已重置。",
+                rules: `
+                    <h2>《Neon Spin》遊玩規則</h2>
+                    <h4>1. 遊戲簡介</h4>
+                    <p>《Neon Spin》是一款簡單、快節奏的輪盤遊戲。輪盤總共分為 54 個區塊，包含 4 種數字區塊以及專屬的「神祕盒 (Mystery Box)」區塊。</p>
+                    <h4>2. 如何下注</h4>
+                    <p>玩家可以自由將籌碼押注在 5 個選項上：數字 1、數字 2、數字 5、數字 10，或是 神祕盒 (Mystery Box)。下注時間結束後，主持人將會轉動輪盤。</p>
+                    <h4>3. 隨機幸運倍率 (Lucky Multipliers)</h4>
+                    <p>在輪盤轉動前，系統會為每局遊戲隨機抽出額外的幸運倍率，並分配到 1 或 2 個常規區塊上。<br>
+                    若輪盤最終停在帶有幸運倍率的區塊上，該倍率將會<b>直接取代</b>原先的基礎賠付！</p>
+                    <ul>
+                        <li><b>【倍率升級保證】</b>：附加的幸運倍率絕對會「高於」該選項原本的基礎賠率！例如押中 10 倍區塊，幸運倍率保證從 15 倍起跳，確保您贏得更豐厚的獎金！</li>
+                        <li><b>注意</b>：幸運倍率僅會附加在常規數字上，不會出現在神祕盒區塊上。</li>
+                    </ul>
+                    <h4>4. 神祕盒獎勵 (Mystery Box Bonus)</h4>
+                    <p>當輪盤停在「神祕盒」區塊時，本局有在該選項下注的玩家即可進入神祕盒環節。畫面上將會出現 3 個寶箱。玩家必須在 <b>5 秒內</b>點擊選擇其中 1 個寶箱。若玩家在時間內未做出選擇，系統將會代為隨機挑選 1 個寶箱。<br>
+                    每個寶箱內皆藏有不同的高低倍率，打開寶箱後，玩家將根據自己抽中的專屬倍率獲得對應獎金。</p>
+                    <h4>5. 基礎賠付表 (Standard Payouts)</h4>
+                    <ul>
+                        <li>押中 1：賠付 1:1</li>
+                        <li>押中 2：賠付 2:1</li>
+                        <li>押中 5：賠付 5:1</li>
+                        <li>押中 10：賠付 10:1</li>
+                        <li>押中 神祕盒：依抽中寶箱內顯示的倍率進行賠付。</li>
+                    </ul>
+                `
+            },
+            en: {
+                btnRules: "📖 Game Rules", chooseBets: "Choose Your Bets", chip: "Betted", spin: "🎰 Single Spin (Visual)", sim: "🚀 Quick Simulate 10k Rounds",
+                logTitle: "Latest Events", statsTitle: "RTP Statistics (Cumulative)", resetBtn: "Reset Stats", boxTitle: "🌟 Mystery Box Triggered! Pick a chest 🌟", closeBox: "Claim & Close", closeRules: "Close Rules",
+                th_op: "Bet Option", th_be: "Total Bets", th_wi: "Total Wins", th_srtp: "Simulated RTP", th_trtp: "Theoretical RTP",
+                alertSelect: "Please select at least one bet option!",
+                msgBonusFlash: "[System] ⚡ {0} got Bonus! Upgraded to {1}x!",
+                msgWheelStop: "[Wheel] Stopped on 🎯 {0}{1}",
+                msgBonusSuffix: " (Bonus!)",
+                msgWin: "💰 Congratulations! You won {0} units!",
+                msgLose: "❌ Better luck next time.",
+                msgBoxTrigger: "🎁 Mystery Box Triggered! Waiting for pick...",
+                msgBoxResult: "💰 Mystery Box Revealed! You chose the {0}x reward!",
+                msgSimStart: "🚀 Starting pure math simulation for {0} rounds... please wait.",
+                msgSimDone: "✅ Simulation complete! Stats updated.",
+                msgReset: "Statistics and logs have been reset.",
+                rules: `
+                    <h2>Neon Spin Game Rules</h2>
+                    <h4>1. Game Overview</h4>
+                    <p>Neon Spin is a simple, fast-paced lucky wheel game show. The wheel consists of 54 segments, featuring 4 different numbers and a special "Mystery Box" segment.</p>
+                    <h4>2. How to Play</h4>
+                    <p>Players can place their bets on 5 available options: Number 1, Number 2, Number 5, Number 10, or the Mystery Box. Once betting time is over, the presenter will spin the lucky wheel.</p>
+                    <h4>3. Lucky Multipliers</h4>
+                    <p>Before the wheel is spun, extra random multipliers are drawn and distributed to 1 or 2 regular segments each game round.<br>
+                    If the wheel stops on a segment with a multiplier, this enhanced multiplier will <b>replace</b> the standard payout value for the selected number.</p>
+                    <ul>
+                        <li><b>[Upgrade Guarantee]</b>: The applied lucky multiplier will ALWAYS be strictly higher than the base payout of that segment! For instance, if a multiplier lands on Number 10, it is guaranteed to be 15x or higher, ensuring a much bigger win!</li>
+                        <li><b>Note</b>: Random multipliers do not apply to the Mystery Box segment.</li>
+                    </ul>
+                    <h4>4. Mystery Box Bonus</h4>
+                    <p>Triggered when the wheel stops on the Mystery Box segment. Every player with a valid bet on the Mystery Box in the current game round is eligible to take part.<br>
+                    3 chests will appear on the screen. Players have <b>5 seconds</b> to pick 1 chest of their choice. If a player misses the selection time, the system will select one box randomly on their behalf.<br>
+                    Each chest contains a hidden multiplier. Players will be rewarded according to the multiplier inside their chosen box.</p>
+                    <h4>5. Standard Payouts</h4>
+                    <ul>
+                        <li>Number 1: Pays 1:1</li>
+                        <li>Number 2: Pays 2:1</li>
+                        <li>Number 5: Pays 5:1</li>
+                        <li>Number 10: Pays 10:1</li>
+                        <li>Mystery Box: Pays according to the revealed multiplier.</li>
+                    </ul>
+                `
+            }
+        };
+
+        function getText(key) { return i18n[currentLang][key]; }
+        function formatText(key, ...args) {
+            let str = getText(key);
+            args.forEach((val, i) => { str = str.replace(`{${i}}`, val); });
+            return str;
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            
+            // 更新介面文字
+            document.getElementById('langBtn').innerText = currentLang === 'zh' ? 'EN / 中文' : '中文 / EN';
+            document.getElementById('rulesBtn').innerText = getText('btnRules');
+            document.getElementById('t_chooseBets').innerText = getText('chooseBets');
+            document.querySelectorAll('.t_chip').forEach(el => el.innerText = getText('chip'));
+            document.getElementById('spinBtn').innerText = getText('spin');
+            document.getElementById('simBtn').innerText = getText('sim');
+            document.getElementById('t_logTitle').innerText = getText('logTitle');
+            document.getElementById('t_statsTitle').innerText = getText('statsTitle');
+            document.getElementById('t_resetBtn').innerText = getText('resetBtn');
+            document.getElementById('t_boxTitle').innerText = getText('boxTitle');
+            document.getElementById('modalCloseBtn').innerText = getText('closeBox');
+            document.getElementById('t_rulesClose').innerText = getText('closeRules');
+            
+            document.getElementById('th_option').innerText = getText('th_op');
+            document.getElementById('th_bets').innerText = getText('th_be');
+            document.getElementById('th_wins').innerText = getText('th_wi');
+            document.getElementById('th_srtp').innerText = getText('th_srtp');
+            document.getElementById('th_trtp').innerText = getText('th_trtp');
+            
+            document.getElementById('rulesContentBox').innerHTML = getText('rules');
+            updateStatsTable(); // 更新表格以應用翻譯
+        }
+
+        // 規則視窗控制
+        function openRulesModal() {
+            document.getElementById('rulesContentBox').innerHTML = getText('rules');
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        function closeRulesModal() { document.getElementById('rulesModal').style.display = 'none'; }
+
         // --- 1. 資料與模型 ---
         const typeNames = { 0: "1x", 1: "2x", 2: "5x", 3: "10x", 4: "Mystery Box" };
         const colors = { 0: "#FFEB3B", 1: "#2196F3", 2: "#E91E63", 3: "#9C27B0", 4: "#00E5FF" };
@@ -196,12 +365,9 @@
         const sliceAngle = (2 * Math.PI) / 54;
         let currentRotation = 0;
 
-        // 雙層繪製邏輯：先畫底層普通區塊，再畫上層Bonus發光區塊
         function drawWheel() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // 繪製非 Bonus 區塊
             for (let i = 0; i < 54; i++) { if (!wheelSegments[i].isFlashing) drawSegment(i); }
-            // 繪製正在閃爍的 Bonus 區塊（疊加在最上層，光暈才不會被遮擋）
             for (let i = 0; i < 54; i++) { if (wheelSegments[i].isFlashing) drawSegment(i); }
         }
 
@@ -215,59 +381,41 @@
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.closePath();
 
-            // 如果是 Bonus 狀態且正在閃爍
             if (segment.isFlashing) {
-                ctx.fillStyle = "#FF00EA"; // 霓虹粉
-                ctx.shadowColor = "#FF00EA";
-                ctx.shadowBlur = 25;       // 發光效果
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = "#FFFFFF"; // 醒目白邊框
+                ctx.fillStyle = "#FF00EA"; ctx.shadowColor = "#FF00EA"; ctx.shadowBlur = 25; ctx.lineWidth = 4; ctx.strokeStyle = "#FFFFFF";
             } else {
-                ctx.fillStyle = colors[segment.type]; 
-                ctx.shadowBlur = 0;
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = "#111";
+                ctx.fillStyle = colors[segment.type]; ctx.shadowBlur = 0; ctx.lineWidth = 1; ctx.strokeStyle = "#111";
             }
-            
-            ctx.fill();
-            ctx.stroke();
+            ctx.fill(); ctx.stroke();
 
-            // 繪製文字
             ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(startAngle + sliceAngle / 2);
-            ctx.textAlign = "right";
+            ctx.translate(centerX, centerY); ctx.rotate(startAngle + sliceAngle / 2); ctx.textAlign = "right";
             
             if (segment.isFlashing) {
-                ctx.fillStyle = "#FFF"; 
-                ctx.font = "bold 22px Arial";
-                ctx.shadowColor = "#000"; // 文字加上黑色陰影增加辨識度
-                ctx.shadowBlur = 8;
+                ctx.fillStyle = "#FFF"; ctx.font = "bold 22px Arial"; ctx.shadowColor = "#000"; ctx.shadowBlur = 8;
             } else {
-                ctx.fillStyle = (segment.type === 0) ? "#000" : "#FFF"; 
-                ctx.font = "bold 14px Arial";
-                ctx.shadowBlur = 0;
+                ctx.fillStyle = (segment.type === 0) ? "#000" : "#FFF"; ctx.font = "bold 14px Arial"; ctx.shadowBlur = 0;
             }
             
             let text = segment.type === 4 ? "BOX" : typeNames[segment.type];
             if (segment.isFlashing && segment.bonus) text = segment.bonus + "x"; 
             
-            ctx.fillText(text, radius - 20, 6);
-            ctx.restore();
+            ctx.fillText(text, radius - 20, 6); ctx.restore();
         }
-        drawWheel(); // 初始繪製
+        drawWheel(); 
 
         // --- 3. UI 與工具 ---
         document.querySelectorAll('.bet-btn').forEach(btn => btn.addEventListener('click', () => btn.classList.toggle('active')));
         function getActiveBets() { return Array.from(document.querySelectorAll('.bet-btn.active')).map(b => parseInt(b.getAttribute('data-bet'))); }
+        
         function logMessage(msg, type = '') {
             const logArea = document.getElementById('log-output');
             logArea.innerHTML += `<div style="margin-bottom: 5px;" class="${type}">${msg}</div>`;
             logArea.scrollTop = logArea.scrollHeight;
         }
+
         function updateStatsTable() {
-            const tbody = document.getElementById('stats-body');
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('stats-body'); tbody.innerHTML = '';
             for (let i = 0; i < 5; i++) {
                 let rtp = stats.bets[i] > 0 ? ((stats.wins[i] / stats.bets[i]) * 100).toFixed(4) : "0.0000";
                 tbody.innerHTML += `
@@ -275,23 +423,27 @@
                 `;
             }
         }
-        function resetStats() { stats = { bets: {0:0, 1:0, 2:0, 3:0, 4:0}, wins: {0:0, 1:0, 2:0, 3:0, 4:0} }; document.getElementById('log-output').innerHTML = ''; logMessage("統計資料與日誌已重置。"); updateStatsTable(); }
+
+        function resetStats() { 
+            stats = { bets: {0:0, 1:0, 2:0, 3:0, 4:0}, wins: {0:0, 1:0, 2:0, 3:0, 4:0} }; 
+            document.getElementById('log-output').innerHTML = ''; 
+            logMessage(getText('msgReset')); 
+            updateStatsTable(); 
+        }
         function setButtonsDisabled(disabled) { document.getElementById("spinBtn").disabled = disabled; document.getElementById("simBtn").disabled = disabled; }
 
-        // --- 4. 視覺轉盤邏輯 (包含閃爍動畫) ---
+        // --- 4. 視覺轉盤邏輯 ---
         let activeRoundData = {};
 
         function startVisualSpin() {
             let activeBets = getActiveBets();
-            if (activeBets.length === 0) { alert("請至少選擇一個下注！"); return; }
+            if (activeBets.length === 0) { alert(getText('alertSelect')); return; }
             setButtonsDisabled(true);
             document.getElementById('log-output').innerHTML = ''; 
 
-            // 清除上次的狀態
             wheelSegments.forEach(s => { s.bonus = null; s.isFlashing = false; });
             drawWheel();
 
-            // 決定這局的 Bonus 數量與位置
             let numBonuses = Math.random() < 0.5 ? 1 : 2;
             let targetIndices = shuffle(regularIndices).slice(0, numBonuses);
             
@@ -299,32 +451,24 @@
                 let type = wheelSegments[idx].type;
                 let mult = weightedChoice(pools[type].vals, pools[type].probs);
                 wheelSegments[idx].bonus = mult;
-                logMessage(`[系統] ⚡ ${typeNames[type]} 獲得 Bonus，倍率升至 ${mult}x！`, 'highlight-bonus');
+                logMessage(formatText('msgBonusFlash', typeNames[type], mult), 'highlight-bonus');
             });
 
-            // 🌟 執行「轉前揭曉」閃爍動畫
             let blinkCount = 0;
             let blinkInterval = setInterval(() => {
-                // 切換閃爍狀態
                 targetIndices.forEach(idx => wheelSegments[idx].isFlashing = !wheelSegments[idx].isFlashing);
-                drawWheel();
-                blinkCount++;
-
-                // 閃爍 6 次 (亮暗交替) 後停止，準備旋轉
+                drawWheel(); blinkCount++;
                 if (blinkCount >= 6) {
                     clearInterval(blinkInterval);
-                    targetIndices.forEach(idx => wheelSegments[idx].isFlashing = true); // 確保轉動時保持高光
-                    drawWheel();
-                    executeRotation(activeBets); // 啟動旋轉
+                    targetIndices.forEach(idx => wheelSegments[idx].isFlashing = true); 
+                    drawWheel(); executeRotation(activeBets); 
                 }
-            }, 300); // 每 0.3 秒切換一次亮暗
+            }, 300); 
         }
 
         function executeRotation(activeBets) {
             let resultIdx = Math.floor(Math.random() * 54);
             activeRoundData = { segment: wheelSegments[resultIdx], bets: activeBets };
-
-            // 轉盤動畫
             let sliceDeg = 360 / 54;
             let targetAngle = 360 - (resultIdx * sliceDeg);
             let randomOffset = (Math.random() * (sliceDeg * 0.8)) - (sliceDeg * 0.4); 
@@ -339,26 +483,25 @@
 
         function resolveVisualSpin() {
             let res = activeRoundData.segment;
-            logMessage(`[輪盤] 停在 🎯 ${typeNames[res.type]}${res.bonus ? ' (Bonus!)' : ''}`);
+            let suffix = res.bonus ? getText('msgBonusSuffix') : '';
+            logMessage(formatText('msgWheelStop', typeNames[res.type], suffix));
             activeRoundData.bets.forEach(bet => stats.bets[bet]++);
 
             if (activeRoundData.bets.includes(res.type)) {
-                if (res.type === 4) {
-                    triggerMysteryBox(); return; 
-                } else {
+                if (res.type === 4) { triggerMysteryBox(); return; } 
+                else {
                     let win = res.bonus ? (res.bonus + 1) : baseReturns[res.type];
                     stats.wins[res.type] += win;
-                    logMessage(`💰 恭喜押中，獲得賠付: ${win} 單位！`, 'highlight-win');
+                    logMessage(formatText('msgWin', win), 'highlight-win');
                 }
-            } else { logMessage(`❌ 沒押中。`); }
+            } else { logMessage(getText('msgLose')); }
 
             updateStatsTable();
             setButtonsDisabled(false);
         }
 
-        // --- 神秘盒與快速模擬邏輯保持不變 ---
         function triggerMysteryBox() {
-            logMessage(`🎁 觸發神秘盒！等待選擇...`, 'highlight-bonus');
+            logMessage(getText('msgBoxTrigger'), 'highlight-bonus');
             activeRoundData.boxChoices = shuffle([ weightedChoice(boxA.vals, boxA.probs), weightedChoice(boxB.vals, boxB.probs), weightedChoice(boxC.vals, boxC.probs) ]);
             const container = document.getElementById("boxesContainer"); container.innerHTML = '';
             document.getElementById("modalCloseBtn").style.display = "none";
@@ -375,14 +518,16 @@
                 if (idx === index) box.classList.add('winner');
             });
             stats.wins[4] += val; updateStatsTable();
-            logMessage(`💰 神秘盒開獎！你選擇了 ${val}x 的獎勵！`, 'highlight-win');
+            logMessage(formatText('msgBoxResult', val), 'highlight-win');
             document.getElementById("modalCloseBtn").style.display = "block";
         }
         function closeMysteryModal() { document.getElementById("mysteryModal").style.display = "none"; setButtonsDisabled(false); }
 
         function runBulkSimulation(rounds) {
-            let activeBets = getActiveBets(); if (activeBets.length === 0) { alert("請至少選擇一個下注！"); return; }
-            setButtonsDisabled(true); logMessage(`🚀 啟動純數學模擬 ${rounds.toLocaleString()} 局...請稍候`);
+            let activeBets = getActiveBets(); if (activeBets.length === 0) { alert(getText('alertSelect')); return; }
+            setButtonsDisabled(true); 
+            logMessage(formatText('msgSimStart', rounds.toLocaleString()));
+            
             setTimeout(() => {
                 for (let i = 0; i < rounds; i++) {
                     let numBonuses = Math.random() < 0.5 ? 1 : 2;
@@ -402,10 +547,12 @@
                         stats.wins[betType] += winAmount;
                     });
                 }
-                logMessage(`✅ 模擬完成！統計資料已更新。`, 'highlight-win'); updateStatsTable(); setButtonsDisabled(false);
+                logMessage(getText('msgSimDone'), 'highlight-win'); 
+                updateStatsTable(); setButtonsDisabled(false);
             }, 50);
         }
 
+        // 初始化語系
         updateStatsTable();
     </script>
 </body>
