@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Spin 實境轉盤模擬</title>
+    <title>Neon Spin 綜合模擬器</title>
     <style>
         :root {
             --bg-color: #0f0f1b;
@@ -11,7 +11,6 @@
             --neon-blue: #00f3ff;
             --neon-pink: #ff00ea;
             --neon-green: #39ff14;
-            --neon-yellow: #ffea00;
             --text-main: #e0e0e0;
         }
         body {
@@ -25,14 +24,34 @@
             align-items: center;
             overflow-x: hidden;
         }
-        h1 { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); text-align: center; }
+        h1 { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); text-align: center; margin-bottom: 30px; }
         
-        /* 轉盤區塊 */
+        /* 整體佈局容器 */
+        .layout-container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 上半部：左右分欄 */
+        .top-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        /* 左邊：輪盤區 */
+        .left-col {
+            flex: 0 0 auto;
+        }
         .wheel-container {
             position: relative;
             width: 400px;
             height: 400px;
-            margin: 20px auto;
             border-radius: 50%;
             box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
         }
@@ -42,14 +61,10 @@
             border-radius: 50%;
             transition: transform 5s cubic-bezier(0.25, 0.1, 0.15, 1);
         }
-        /* 轉盤指針 */
         .pointer {
             position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0; 
-            height: 0; 
+            top: -20px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; 
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
             border-top: 40px solid var(--neon-pink);
@@ -57,28 +72,25 @@
             z-index: 10;
         }
 
-        /* 遊戲控制區 */
-        .game-panel {
-            width: 100%;
-            max-width: 800px;
+        /* 右邊：控制區 */
+        .right-col {
+            flex: 1;
+            min-width: 300px;
             background: var(--panel-bg);
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
             box-shadow: 0 0 20px rgba(255, 0, 234, 0.2);
-            margin-bottom: 20px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
         .bet-section {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
         .bet-btn {
-            flex: 1;
-            min-width: 110px;
-            padding: 15px;
+            padding: 15px 10px;
             background: #2a2a4a;
             border: 2px solid #3a3a6a;
             color: white;
@@ -92,94 +104,124 @@
             align-items: center;
             gap: 5px;
         }
+        .bet-btn.wide { grid-column: span 2; }
         .bet-btn .chip { display: none; background: var(--neon-green); color: black; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
-        .bet-btn.active { border-color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); background: #3a2a4a; }
+        .bet-btn.active { border-color: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); background: #3a2a4a; }
         .bet-btn.active .chip { display: block; }
         
         .action-btn {
-            padding: 15px 40px;
-            font-size: 20px;
+            padding: 15px;
+            font-size: 18px;
             font-weight: bold;
             color: #000;
             background: var(--neon-green);
             border: none;
-            border-radius: 30px;
+            border-radius: 8px;
             cursor: pointer;
             box-shadow: 0 0 15px var(--neon-green);
             transition: transform 0.1s;
         }
-        .action-btn:active { transform: scale(0.95); }
+        .action-btn.simulate { background: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
+        .action-btn:active { transform: scale(0.98); }
         .action-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; }
+
+        /* 下半部：日誌與統計 */
+        .bottom-row {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+        .panel h3 { margin-top: 0; color: var(--neon-blue); }
+        
+        .log-area {
+            background: #000; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 150px; overflow-y: auto; font-family: monospace; font-size: 14px;
+        }
+        .highlight-win { color: var(--neon-green); font-weight: bold;}
+        .highlight-bonus { color: var(--neon-pink); font-weight: bold;}
+
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .stats-table th, .stats-table td { border: 1px solid #333; padding: 10px; text-align: center; }
+        .stats-table th { background: #2a2a4a; color: var(--neon-blue); }
 
         /* 神秘盒彈出視窗 */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column;
         }
         .modal-title { color: var(--neon-blue); font-size: 32px; margin-bottom: 30px; text-shadow: 0 0 15px var(--neon-blue); }
         .boxes-container { display: flex; gap: 30px; }
         .mystery-box {
-            width: 120px; height: 120px;
-            background: linear-gradient(135deg, #4b0082, #8a2be2);
-            border: 3px solid var(--neon-pink);
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 20px var(--neon-pink);
-            transition: transform 0.3s;
+            width: 120px; height: 120px; background: linear-gradient(135deg, #4b0082, #8a2be2); border: 3px solid var(--neon-pink); border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px var(--neon-pink); transition: transform 0.3s;
         }
         .mystery-box:hover { transform: scale(1.1); }
         .mystery-box.opened { background: #222; border-color: #555; cursor: default; transform: scale(1); box-shadow: none; }
         .mystery-box.winner { border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); }
-        
         .close-btn { margin-top: 30px; display: none; padding: 10px 30px; background: var(--neon-blue); color: black; font-size: 18px; border: none; border-radius: 20px; cursor: pointer; }
-
-        /* 遊戲日誌 */
-        .log-area {
-            background: #000; padding: 15px; border-radius: 8px; border: 1px solid #333; height: 150px; overflow-y: auto; font-family: monospace; font-size: 14px; text-align: left;
-        }
-        .highlight-win { color: var(--neon-green); font-weight: bold;}
-        .highlight-bonus { color: var(--neon-pink); font-weight: bold;}
     </style>
 </head>
 <body>
 
-    <h1>Neon Spin - 實境體驗</h1>
+    <h1>Neon Spin</h1>
 
-    <div class="wheel-container">
-        <div class="pointer"></div>
-        <canvas id="wheelCanvas" width="500" height="500"></canvas>
-    </div>
+    <div class="layout-container">
+        <div class="top-row">
+            <div class="left-col">
+                <div class="wheel-container">
+                    <div class="pointer"></div>
+                    <canvas id="wheelCanvas" width="500" height="500"></canvas>
+                </div>
+            </div>
 
-    <div class="game-panel">
-        <h3>選擇下注 (每項 1 單位)</h3>
-        <div class="bet-section" id="bet-options">
-            <button class="bet-btn active" data-bet="0"><span>1x</span><span class="chip">已下注</span></button>
-            <button class="bet-btn active" data-bet="1"><span>2x</span><span class="chip">已下注</span></button>
-            <button class="bet-btn active" data-bet="2"><span>5x</span><span class="chip">已下注</span></button>
-            <button class="bet-btn active" data-bet="3"><span>10x</span><span class="chip">已下注</span></button>
-            <button class="bet-btn active" data-bet="4"><span>Mystery Box</span><span class="chip">已下注</span></button>
+            <div class="right-col">
+                <h3 style="margin-top: 0; text-align: center; color: var(--neon-pink);">選擇下注目標</h3>
+                <div class="bet-section" id="bet-options">
+                    <button class="bet-btn active" data-bet="0"><span>1x</span><span class="chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="1"><span>2x</span><span class="chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="2"><span>5x</span><span class="chip">已下注</span></button>
+                    <button class="bet-btn active" data-bet="3"><span>10x</span><span class="chip">已下注</span></button>
+                    <button class="bet-btn wide active" data-bet="4"><span>Mystery Box</span><span class="chip">已下注</span></button>
+                </div>
+                <button class="action-btn" id="spinBtn" onclick="startVisualSpin()">🎰 單局實境轉盤 (SPIN)</button>
+                <button class="action-btn simulate" id="simBtn" onclick="runBulkSimulation(10000)">🚀 快速模擬 10,000 局</button>
+            </div>
         </div>
-        <button class="action-btn" id="spinBtn" onclick="startSpin()">SPIN!</button>
-        
-        <h3 style="margin-top: 30px;">最新動態</h3>
-        <div class="log-area" id="log-output"></div>
+
+        <div class="bottom-row">
+            <div class="panel">
+                <h3>最新動態</h3>
+                <div class="log-area" id="log-output"></div>
+            </div>
+
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">RTP 統計數據 (累計)</h3>
+                    <button onclick="resetStats()" style="padding: 5px 15px; cursor: pointer; background: #333; color: white; border: 1px solid #555; border-radius: 5px;">重置統計</button>
+                </div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>下注選項</th>
+                            <th>總下注數</th>
+                            <th>總贏分 (含本金)</th>
+                            <th>實測 RTP</th>
+                            <th>理論 RTP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div class="modal-overlay" id="mysteryModal">
         <div class="modal-title">🌟 觸發神秘盒！請選擇一個寶箱 🌟</div>
-        <div class="boxes-container" id="boxesContainer">
-            </div>
+        <div class="boxes-container" id="boxesContainer"></div>
         <button class="close-btn" id="modalCloseBtn" onclick="closeMysteryModal()">結算並關閉</button>
     </div>
 
@@ -188,8 +230,8 @@
         const typeNames = { 0: "1x", 1: "2x", 2: "5x", 3: "10x", 4: "Mystery Box" };
         const colors = { 0: "#FFEB3B", 1: "#2196F3", 2: "#E91E63", 3: "#9C27B0", 4: "#00E5FF" };
         const baseReturns = { 0: 2, 1: 3, 2: 6, 3: 11 };
+        const theoreticalRTP = { 0: 96.48, 1: 96.50, 2: 96.50, 3: 96.51, 4: 96.44 };
         
-        // 四軌 Bonus 機率池
         const pools = {
             0: { vals: [5, 10, 15, 20, 25, 50], probs: [0.20, 0.21, 0.23, 0.06, 0.28, 0.02] },
             1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02] },
@@ -197,12 +239,13 @@
             3: { vals: [15, 25, 50, 100, 250, 500], probs: [0.08, 0.58, 0.06, 0.21, 0.01, 0.06] }
         };
 
-        // 神秘盒機率池
         const boxA = { vals: [3], probs: [1.0] };
         const boxB = { vals: [4, 6], probs: [0.76, 0.24] };
         const boxC = { vals: [11, 16, 26, 51], probs: [0.88, 0.10, 0.01, 0.01] };
 
-        // 輔助函式：加權隨機
+        // 統計狀態
+        let stats = { bets: {0:0, 1:0, 2:0, 3:0, 4:0}, wins: {0:0, 1:0, 2:0, 3:0, 4:0} };
+
         function weightedChoice(vals, probs) {
             let r = Math.random(), sum = 0;
             for (let i = 0; i < probs.length; i++) {
@@ -212,24 +255,23 @@
             return vals[vals.length - 1];
         }
 
-        // --- 2. 建立轉盤結構 (54格) ---
-        // 精確數量: 1x(21), 2x(14), 5x(7), 10x(4), Box(8)
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // --- 2. 轉盤與陣列初始化 ---
         let rawWheel = [
             ...Array(21).fill(0), ...Array(14).fill(1), 
             ...Array(7).fill(2), ...Array(4).fill(3), ...Array(8).fill(4)
         ];
-        // 打亂順序讓畫面好看
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
         let wheelSegments = shuffle(rawWheel).map(type => ({ type: type, bonus: null }));
         let regularIndices = wheelSegments.map((s, i) => s.type !== 4 ? i : -1).filter(i => i !== -1);
 
-        // --- 3. 繪製轉盤 (Canvas) ---
         const canvas = document.getElementById("wheelCanvas");
         const ctx = canvas.getContext("2d");
         const centerX = canvas.width / 2;
@@ -242,135 +284,148 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < 54; i++) {
                 let segment = wheelSegments[i];
-                let startAngle = i * sliceAngle - Math.PI / 2; // -PI/2 讓 index 0 在正上方
+                let startAngle = i * sliceAngle - Math.PI / 2; 
                 let endAngle = startAngle + sliceAngle;
 
-                // 畫扇形
                 ctx.beginPath();
                 ctx.moveTo(centerX, centerY);
                 ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-                ctx.fillStyle = segment.bonus ? "#FF00EA" : colors[segment.type]; // 有 Bonus 變亮粉色
+                ctx.fillStyle = segment.bonus ? "#FF00EA" : colors[segment.type]; 
                 ctx.fill();
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "#111";
                 ctx.stroke();
 
-                // 寫文字
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.rotate(startAngle + sliceAngle / 2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = (segment.type === 0 && !segment.bonus) ? "#000" : "#FFF"; // 1x 字體用黑色以利閱讀
+                ctx.fillStyle = (segment.type === 0 && !segment.bonus) ? "#000" : "#FFF"; 
                 ctx.font = segment.bonus ? "bold 18px Arial" : "bold 14px Arial";
                 
-                let text = typeNames[segment.type];
-                if (segment.type === 4) text = "BOX";
-                if (segment.bonus) text = segment.bonus + "x"; // 顯示 Bonus 倍數
-                
+                let text = segment.type === 4 ? "BOX" : typeNames[segment.type];
+                if (segment.bonus) text = segment.bonus + "x"; 
                 ctx.fillText(text, radius - 20, 5);
                 ctx.restore();
             }
         }
         drawWheel();
 
-        // --- 4. 遊戲主邏輯 ---
+        // --- 3. UI 與工具函式 ---
+        document.querySelectorAll('.bet-btn').forEach(btn => {
+            btn.addEventListener('click', () => btn.classList.toggle('active'));
+        });
+
+        function getActiveBets() {
+            return Array.from(document.querySelectorAll('.bet-btn.active')).map(b => parseInt(b.getAttribute('data-bet')));
+        }
+
         function logMessage(msg, type = '') {
             const logArea = document.getElementById('log-output');
             logArea.innerHTML += `<div style="margin-bottom: 5px;" class="${type}">${msg}</div>`;
             logArea.scrollTop = logArea.scrollHeight;
         }
 
-        // 綁定下注按鈕特效
-        document.querySelectorAll('.bet-btn').forEach(btn => {
-            btn.addEventListener('click', () => btn.classList.toggle('active'));
-        });
+        function updateStatsTable() {
+            const tbody = document.getElementById('stats-body');
+            tbody.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                let rtp = stats.bets[i] > 0 ? ((stats.wins[i] / stats.bets[i]) * 100).toFixed(4) : "0.0000";
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${typeNames[i]}</td>
+                    <td>${stats.bets[i].toLocaleString()}</td>
+                    <td>${stats.wins[i].toLocaleString()}</td>
+                    <td style="color: ${rtp > 90 ? 'var(--neon-green)' : 'inherit'}">${rtp}%</td>
+                    <td>${theoreticalRTP[i]}%</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
 
-        let isSpinning = false;
+        function resetStats() {
+            stats = { bets: {0:0, 1:0, 2:0, 3:0, 4:0}, wins: {0:0, 1:0, 2:0, 3:0, 4:0} };
+            document.getElementById('log-output').innerHTML = '';
+            logMessage("統計資料與日誌已重置。");
+            updateStatsTable();
+        }
+
+        function setButtonsDisabled(disabled) {
+            document.getElementById("spinBtn").disabled = disabled;
+            document.getElementById("simBtn").disabled = disabled;
+        }
+
+        // --- 4. 視覺轉盤邏輯 (單局) ---
         let activeRoundData = {};
 
-        function startSpin() {
-            if (isSpinning) return;
-            let activeBets = Array.from(document.querySelectorAll('.bet-btn.active')).map(b => parseInt(b.getAttribute('data-bet')));
+        function startVisualSpin() {
+            let activeBets = getActiveBets();
             if (activeBets.length === 0) { alert("請至少選擇一個下注！"); return; }
+            setButtonsDisabled(true);
+            document.getElementById('log-output').innerHTML = ''; 
 
-            isSpinning = true;
-            document.getElementById("spinBtn").disabled = true;
-            document.getElementById('log-output').innerHTML = ''; // 清空日誌
-
-            // 1. 重置盤面 Bonus
+            // 清除上次 Bonus 並抽出新的
             wheelSegments.forEach(s => s.bonus = null);
-
-            // 2. 抽出 Bonus 並套用至盤面
             let numBonuses = Math.random() < 0.5 ? 1 : 2;
-            let shuffledRegulars = shuffle([...regularIndices]);
-            let targetIndices = shuffledRegulars.slice(0, numBonuses);
+            let targetIndices = shuffle(regularIndices).slice(0, numBonuses);
             
             targetIndices.forEach(idx => {
                 let type = wheelSegments[idx].type;
                 let mult = weightedChoice(pools[type].vals, pools[type].probs);
                 wheelSegments[idx].bonus = mult;
-                logMessage(`[系統] ⚡ ${typeNames[type]} 區塊獲得 Bonus，倍率提升至 ${mult}x！`, 'highlight-bonus');
+                logMessage(`[系統] ⚡ ${typeNames[type]} 獲得 Bonus，倍率升至 ${mult}x！`, 'highlight-bonus');
             });
-            drawWheel(); // 重繪轉盤顯示 Bonus
+            drawWheel();
 
-            // 3. 決定最終結果
+            // 決定結果
             let resultIdx = Math.floor(Math.random() * 54);
-            activeRoundData = {
-                idx: resultIdx,
-                segment: wheelSegments[resultIdx],
-                bets: activeBets
-            };
+            activeRoundData = { segment: wheelSegments[resultIdx], bets: activeBets };
 
-            // 4. 計算旋轉角度 (CSS Transform)
-            // 由於 index 0 在正上方，旋轉角度需扣除目標的相對位置
+            // 轉盤動畫
             let sliceDeg = 360 / 54;
             let targetAngle = 360 - (resultIdx * sliceDeg);
-            let randomOffset = (Math.random() * (sliceDeg * 0.8)) - (sliceDeg * 0.4); // 隨機停在格內某處
-            
-            let spins = 5 * 360; // 轉 5 圈
+            let randomOffset = (Math.random() * (sliceDeg * 0.8)) - (sliceDeg * 0.4); 
+            let spins = 5 * 360; 
             let extraDeg = (targetAngle + randomOffset) - (currentRotation % 360);
             if (extraDeg < 0) extraDeg += 360;
             currentRotation += spins + extraDeg;
 
             canvas.style.transform = `rotate(${currentRotation}deg)`;
-
-            // 等待動畫結束 (5秒)
-            setTimeout(resolveSpin, 5200);
+            setTimeout(resolveVisualSpin, 5200);
         }
 
-        function resolveSpin() {
+        function resolveVisualSpin() {
             let res = activeRoundData.segment;
-            logMessage(`[輪盤] 停在 🎯 ${typeNames[res.type]}${res.bonus ? ' (Bonus 區塊!)' : ''}`);
+            logMessage(`[輪盤] 停在 🎯 ${typeNames[res.type]}${res.bonus ? ' (Bonus!)' : ''}`);
 
-            // 判斷是否中獎
+            // 統計總下注
+            activeRoundData.bets.forEach(bet => stats.bets[bet]++);
+
             if (activeRoundData.bets.includes(res.type)) {
                 if (res.type === 4) {
-                    triggerMysteryBox(); // 觸發神秘盒
-                    return; // 中斷這裡，等玩家選完
+                    triggerMysteryBox(); 
+                    return; // 進入神祕盒流程，中斷結算
                 } else {
                     let win = res.bonus ? (res.bonus + 1) : baseReturns[res.type];
-                    logMessage(`💰 恭喜！你押中了，獲得賠付: ${win} 單位！`, 'highlight-win');
+                    stats.wins[res.type] += win;
+                    logMessage(`💰 恭喜押中，獲得賠付: ${win} 單位！`, 'highlight-win');
                 }
             } else {
-                logMessage(`❌ 沒押中，下次好運。`);
+                logMessage(`❌ 沒押中。`);
             }
 
-            endRound();
+            updateStatsTable();
+            setButtonsDisabled(false);
         }
 
-        function endRound() {
-            isSpinning = false;
-            document.getElementById("spinBtn").disabled = false;
-        }
-
-        // --- 5. 神秘盒互動邏輯 ---
+        // 神秘盒視覺邏輯
         function triggerMysteryBox() {
-            logMessage(`🎁 觸發神秘盒！等待玩家選擇...`, 'highlight-bonus');
-            let valA = weightedChoice(boxA.vals, boxA.probs);
-            let valB = weightedChoice(boxB.vals, boxB.probs);
-            let valC = weightedChoice(boxC.vals, boxC.probs);
-            
-            activeRoundData.boxChoices = shuffle([valA, valB, valC]); // 打亂順序放進三個箱子
+            logMessage(`🎁 觸發神秘盒！等待選擇...`, 'highlight-bonus');
+            activeRoundData.boxChoices = shuffle([
+                weightedChoice(boxA.vals, boxA.probs),
+                weightedChoice(boxB.vals, boxB.probs),
+                weightedChoice(boxC.vals, boxC.probs)
+            ]);
             
             const container = document.getElementById("boxesContainer");
             container.innerHTML = '';
@@ -380,37 +435,83 @@
                 let box = document.createElement('div');
                 box.className = 'mystery-box';
                 box.innerText = "?";
-                box.onclick = () => openBox(box, index, val);
+                box.onclick = () => openVisualBox(box, index, val);
                 container.appendChild(box);
             });
-
             document.getElementById("mysteryModal").style.display = "flex";
         }
 
-        function openBox(selectedBoxElem, selectedIndex, selectedVal) {
-            // 防止重複點擊
+        function openVisualBox(boxElem, index, val) {
             if (document.getElementById("modalCloseBtn").style.display === "block") return;
 
-            const boxes = document.querySelectorAll('.mystery-box');
-            
-            // 翻開所有箱子
-            boxes.forEach((box, idx) => {
+            document.querySelectorAll('.mystery-box').forEach((box, idx) => {
                 box.classList.add('opened');
                 box.innerText = activeRoundData.boxChoices[idx] + "x";
-                if (idx === selectedIndex) {
-                    box.classList.add('winner');
-                }
+                if (idx === index) box.classList.add('winner');
             });
 
-            logMessage(`💰 神秘盒結算！你選擇了 ${selectedVal}x 的獎勵！`, 'highlight-win');
+            stats.wins[4] += val; // 神秘盒派彩
+            updateStatsTable();
+            logMessage(`💰 神秘盒開獎！你選擇了 ${val}x 的獎勵！`, 'highlight-win');
             document.getElementById("modalCloseBtn").style.display = "block";
         }
 
         function closeMysteryModal() {
             document.getElementById("mysteryModal").style.display = "none";
-            endRound();
+            setButtonsDisabled(false);
         }
 
+        // --- 5. 背景快速模擬 (純數學，無動畫) ---
+        function runBulkSimulation(rounds) {
+            let activeBets = getActiveBets();
+            if (activeBets.length === 0) { alert("請至少選擇一個下注！"); return; }
+            
+            setButtonsDisabled(true);
+            logMessage(`🚀 啟動純數學模擬 ${rounds.toLocaleString()} 局...請稍候`);
+
+            setTimeout(() => {
+                for (let i = 0; i < rounds; i++) {
+                    simulateMathRound(activeBets);
+                }
+                logMessage(`✅ 模擬完成！統計資料已更新。`, 'highlight-win');
+                updateStatsTable();
+                setButtonsDisabled(false);
+            }, 50); // 微小延遲避免凍結畫面
+        }
+
+        function simulateMathRound(activeBets) {
+            let numBonuses = Math.random() < 0.5 ? 1 : 2;
+            let bonusTargets = shuffle(regularIndices).slice(0, numBonuses);
+            let resultIdx = Math.floor(Math.random() * 54);
+            let resultType = wheelSegments[resultIdx].type;
+
+            activeBets.forEach(betType => {
+                stats.bets[betType]++;
+                let winAmount = 0;
+
+                if (betType === resultType) {
+                    if (betType !== 4) {
+                        if (bonusTargets.includes(resultIdx)) {
+                            winAmount = weightedChoice(pools[betType].vals, pools[betType].probs) + 1;
+                        } else {
+                            winAmount = baseReturns[betType];
+                        }
+                    } else {
+                        // 神秘盒自動隨機三選一
+                        let choices = [
+                            weightedChoice(boxA.vals, boxA.probs),
+                            weightedChoice(boxB.vals, boxB.probs),
+                            weightedChoice(boxC.vals, boxC.probs)
+                        ];
+                        winAmount = choices[Math.floor(Math.random() * 3)];
+                    }
+                }
+                stats.wins[betType] += winAmount;
+            });
+        }
+
+        // 初始化
+        updateStatsTable();
     </script>
 </body>
 </html>
