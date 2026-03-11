@@ -227,7 +227,7 @@
             <h2 id="t_settingsTitle">⚙️ Model Parameters Settings</h2>
             
             <div class="settings-section">
-                <h4>Segments Distribution (Total: <span id="segmentTotal">54</span>)</h4>
+                <h4>Segments Distribution (Total: <span id="segmentTotal">0</span>)</h4>
                 <div class="settings-grid">
                     <div class="setting-item"><label>1x Segments</label><input type="number" id="seg0" min="0" oninput="updateSegmentTotal()"></div>
                     <div class="setting-item"><label>2x Segments</label><input type="number" id="seg1" min="0" oninput="updateSegmentTotal()"></div>
@@ -308,7 +308,7 @@
                 rules: `
                     <h2>《Neon Spin》遊玩規則</h2>
                     <h4>1. 遊戲簡介</h4>
-                    <p>《Neon Spin》是一款簡單、快節奏的輪盤遊戲。輪盤總共分為 54 個區塊，包含 4 種數字區塊以及專屬的「神祕盒 (Mystery Box)」區塊。</p>
+                    <p>《Neon Spin》是一款簡單、快節奏的輪盤遊戲。預設輪盤總共分為 54 個區塊，包含 4 種數字區塊以及專屬的「神祕盒 (Mystery Box)」區塊。</p>
                     <h4>2. 如何下注</h4>
                     <p>玩家可以自由將籌碼押注在 5 個選項上：數字 1、數字 2、數字 5、數字 10，或是 神祕盒 (Mystery Box)。下注時間結束後，主持人將會轉動輪盤。</p>
                     <h4>3. 隨機幸運倍率 (Lucky Multipliers)</h4>
@@ -353,7 +353,7 @@
                 rules: `
                     <h2>Neon Spin Game Rules</h2>
                     <h4>1. Game Overview</h4>
-                    <p>Neon Spin is a simple, fast-paced lucky wheel game show. The wheel consists of 54 segments, featuring 4 different numbers and a special "Mystery Box" segment.</p>
+                    <p>Neon Spin is a simple, fast-paced lucky wheel game show. The default wheel consists of 54 segments, featuring 4 different numbers and a special "Mystery Box" segment.</p>
                     <h4>2. How to Play</h4>
                     <p>Players can place their bets on 5 available options: Number 1, Number 2, Number 5, Number 10, or the Mystery Box. Once betting time is over, the presenter will spin the lucky wheel.</p>
                     <h4>3. Lucky Multipliers</h4>
@@ -693,16 +693,17 @@
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const radius = centerX - 10;
-        const sliceAngle = (2 * Math.PI) / 54;
         let currentRotation = 0;
 
         function drawWheel() {
+            let totalSegments = wheelSegments.length;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < 54; i++) { if (!wheelSegments[i].isFlashing) drawSegment(i); }
-            for (let i = 0; i < 54; i++) { if (wheelSegments[i].isFlashing) drawSegment(i); }
+            for (let i = 0; i < totalSegments; i++) { if (!wheelSegments[i].isFlashing) drawSegment(i, totalSegments); }
+            for (let i = 0; i < totalSegments; i++) { if (wheelSegments[i].isFlashing) drawSegment(i, totalSegments); }
         }
 
-        function drawSegment(i) {
+        function drawSegment(i, totalSegments) {
+            let sliceAngle = (2 * Math.PI) / totalSegments;
             let segment = wheelSegments[i];
             let startAngle = i * sliceAngle - Math.PI / 2; 
             let endAngle = startAngle + sliceAngle;
@@ -720,8 +721,9 @@
             ctx.fill(); ctx.stroke();
 
             ctx.save();
-            ctx.translate(centerX, centerY); ctx.rotate(startAngle + sliceAngle / 2); ctx.textAlign = "right";
-            
+            ctx.translate(centerX + Math.cos(startAngle + sliceAngle / 2) * (radius * 0.75), 
+                          centerY + Math.sin(startAngle + sliceAngle / 2) * (radius * 0.75));
+            ctx.rotate(startAngle + sliceAngle / 2 + Math.PI / 2);
             if (segment.isFlashing) {
                 ctx.fillStyle = "#FFF"; ctx.font = "bold 22px Arial"; ctx.shadowColor = "#000"; ctx.shadowBlur = 8;
             } else {
@@ -731,7 +733,7 @@
             let text = segment.type === 4 ? "BOX" : typeNames[segment.type];
             if (segment.isFlashing && segment.bonus) text = segment.bonus + "x"; 
             
-            ctx.fillText(text, radius - 20, 6); ctx.restore();
+            ctx.fillText(text, 0, 6); ctx.restore();
         }
         drawWheel(); 
 
@@ -798,10 +800,11 @@
         }
 
 function executeRotation(activeBets) {
-            let resultIdx = Math.floor(Math.random() * 54);
+            let totalSegments = wheelSegments.length;
+            let resultIdx = Math.floor(Math.random() * totalSegments);
             activeRoundData = { segment: wheelSegments[resultIdx], bets: activeBets };
             
-            let sliceDeg = 360 / 54;
+            let sliceDeg = 360 / totalSegments;
             
             // 【修正點】：額外扣除半個區塊的角度 (sliceDeg / 2)，讓區塊正中心對齊 12 點鐘指針
             let targetAngle = 360 - (resultIdx * sliceDeg) - (sliceDeg / 2); 
@@ -882,7 +885,7 @@ function executeRotation(activeBets) {
                 for (let i = 0; i < rounds; i++) {
                     let numBonuses = currentModel.getBonusCount();
                     let bonusTargets = shuffle(regularIndices).slice(0, numBonuses);
-                    let resultIdx = Math.floor(Math.random() * 54);
+                    let resultIdx = Math.floor(Math.random() * wheelSegments.length);
                     let resultType = wheelSegments[resultIdx].type;
                     activeBets.forEach(betType => {
                         stats.bets[betType]++; let winAmount = 0;
