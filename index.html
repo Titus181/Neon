@@ -28,11 +28,16 @@
         /* 頂部導覽區 */
         .top-nav {
             width: 100%;
-            max-width: 1000px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 15px 20px;
+            background-color: var(--bg-color); /* 避免被底下內容穿透 */
+            box-sizing: border-box;
+            max-width: 1000px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         h1 { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); margin: 0; }
         .nav-buttons { display: flex; gap: 10px; }
@@ -155,7 +160,7 @@
             <button class="nav-btn" onclick="openSettingsModal()" id="settingsBtn" style="display:none;">⚙️ 參數設定</button>
         </div>
     </div>
-    <div id="v1Warning" style="text-align:center; color: var(--neon-pink); font-size: 14px; margin-top:-10px; margin-bottom: 20px; font-weight: bold;">
+    <div id="v1Warning" style="text-align:center; color: var(--neon-pink); font-size: 14px; padding-bottom: 15px; font-weight: bold; position: sticky; top: 60px; z-index: 999; background-color: var(--bg-color); width: 100%; max-width: 1000px;">
         ※ 目前在預設模式 (v1)。如需自訂轉盤參數與機率，請從左上方切換至 Model v2。
     </div>
 
