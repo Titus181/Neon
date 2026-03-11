@@ -144,6 +144,10 @@
       0.01
     ]
   },
+  "bonusCounts": [
+    1,
+    2
+  ],
   "bonusWeights": [
     85,
     15
