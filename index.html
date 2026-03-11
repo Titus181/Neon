@@ -114,6 +114,31 @@
         .rules-content h2 { color: var(--neon-pink); text-align: center; margin-top: 0; }
         .rules-content h4 { color: var(--neon-green); border-bottom: 1px solid #333; padding-bottom: 5px; }
         .rules-content ul { padding-left: 20px; }
+
+        /* 設定視窗內部樣式 */
+        .settings-content {
+            background: var(--panel-bg); border: 1px solid var(--neon-green); padding: 30px;
+            border-radius: 10px; width: 90%; max-width: 1000px; max-height: 85vh; overflow-y: auto;
+            color: var(--text-main); font-size: 14px; box-shadow: 0 0 30px rgba(57, 255, 20, 0.3);
+        }
+        .settings-content h2 { color: var(--neon-green); text-align: center; margin-top: 0; border-bottom: 2px solid var(--neon-green); padding-bottom: 10px;}
+        .settings-section { margin-bottom: 20px; padding: 15px; background: #222; border-radius: 8px; border: 1px solid #444; }
+        .settings-section h4 {  margin-top: 0; color: var(--neon-blue); }
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .setting-item { display: flex; flex-direction: column; gap: 5px; }
+        .setting-item label { color: #ccc; font-size: 13px; }
+        .setting-item input[type="number"], .setting-item input[type="text"] {
+            background: #111; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; font-family: monospace;
+        }
+        .settings-actions { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .settings-btn { padding: 10px 20px; font-weight: bold; border-radius: 5px; cursor: pointer; border: none; font-size: 15px; transition: transform 0.2s;}
+        .settings-btn:hover { transform: scale(1.05); }
+        .btn-apply { background: var(--neon-green); color: black; box-shadow: 0 0 10px var(--neon-green);}
+        .btn-reset { background: #E91E63; color: white; box-shadow: 0 0 10px #E91E63;}
+        .btn-export { background: var(--neon-blue); color: black; box-shadow: 0 0 10px var(--neon-blue);}
+        .btn-import { background: #FFEB3B; color: black; box-shadow: 0 0 10px #FFEB3B;}
+        
+        #importFileInput { display: none; }
     </style>
 </head>
 <body>
@@ -127,6 +152,7 @@
             </select>
             <button class="nav-btn" onclick="toggleLanguage()" id="langBtn">EN / 中文</button>
             <button class="nav-btn" onclick="openRulesModal()" id="rulesBtn">📖 遊戲說明</button>
+            <button class="nav-btn" onclick="openSettingsModal()" id="settingsBtn">⚙️ 參數設定</button>
         </div>
     </div>
 
@@ -192,6 +218,67 @@
         <button class="close-btn" onclick="closeRulesModal()" id="t_rulesClose">關閉說明</button>
     </div>
 
+    <!-- 設定視窗 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="settings-content">
+            <h2 id="t_settingsTitle">⚙️ Model Parameters Settings</h2>
+            
+            <div class="settings-section">
+                <h4>Segments Distribution (Total: <span id="segmentTotal">54</span>)</h4>
+                <div class="settings-grid">
+                    <div class="setting-item"><label>1x Segments</label><input type="number" id="seg0" min="0" oninput="updateSegmentTotal()"></div>
+                    <div class="setting-item"><label>2x Segments</label><input type="number" id="seg1" min="0" oninput="updateSegmentTotal()"></div>
+                    <div class="setting-item"><label>5x Segments</label><input type="number" id="seg2" min="0" oninput="updateSegmentTotal()"></div>
+                    <div class="setting-item"><label>10x Segments</label><input type="number" id="seg3" min="0" oninput="updateSegmentTotal()"></div>
+                    <div class="setting-item"><label>Mystery Box Segments</label><input type="number" id="seg4" min="0" oninput="updateSegmentTotal()"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>Bonus Trigger Weights (1 or 2 Bonuses)</h4>
+                <div class="settings-grid">
+                    <div class="setting-item"><label>1 Bonus Weight</label><input type="number" id="bonus1Weight" min="0"></div>
+                    <div class="setting-item"><label>2 Bonus Weight</label><input type="number" id="bonus2Weight" min="0"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>Pools Configuration (Comma separated values, e.g., 5,10,15)</h4>
+                <div class="settings-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="setting-item"><label>Pool 0 (1x) Vals</label><input type="text" id="p0v"></div>
+                    <div class="setting-item"><label>Pool 0 (1x) Weights</label><input type="text" id="p0p"></div>
+                    <div class="setting-item"><label>Pool 1 (2x) Vals</label><input type="text" id="p1v"></div>
+                    <div class="setting-item"><label>Pool 1 (2x) Weights</label><input type="text" id="p1p"></div>
+                    <div class="setting-item"><label>Pool 2 (5x) Vals</label><input type="text" id="p2v"></div>
+                    <div class="setting-item"><label>Pool 2 (5x) Weights</label><input type="text" id="p2p"></div>
+                    <div class="setting-item"><label>Pool 3 (10x) Vals</label><input type="text" id="p3v"></div>
+                    <div class="setting-item"><label>Pool 3 (10x) Weights</label><input type="text" id="p3p"></div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4>Mystery Boxes Configuration</h4>
+                <div class="settings-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="setting-item"><label>Box A Vals</label><input type="text" id="bAv"></div>
+                    <div class="setting-item"><label>Box A Weights</label><input type="text" id="bAp"></div>
+                    <div class="setting-item"><label>Box B Vals</label><input type="text" id="bBv"></div>
+                    <div class="setting-item"><label>Box B Weights</label><input type="text" id="bBp"></div>
+                    <div class="setting-item"><label>Box C Vals</label><input type="text" id="bCv"></div>
+                    <div class="setting-item"><label>Box C Weights</label><input type="text" id="bCp"></div>
+                </div>
+            </div>
+
+            <div class="settings-actions">
+                <button class="settings-btn btn-apply" onclick="saveSettings()">💾 Save & Apply</button>
+                <button class="settings-btn btn-export" onclick="exportSettings()">📤 Export Config (.json)</button>
+                <button class="settings-btn btn-import" onclick="document.getElementById('importFileInput').click()">📥 Import Config</button>
+                <button class="settings-btn btn-reset" onclick="resetSettings()">🔄 Reset Default</button>
+                <button class="settings-btn" style="background:#555; color:white;" onclick="closeSettingsModal()">Cancel</button>
+            </div>
+            <input type="file" id="importFileInput" accept=".json" onchange="importSettings(event)">
+        </div>
+    </div>
+
     <script>
         // --- 0. 語系與字典 (i18n) ---
         let currentLang = 'en'; // 預設英文
@@ -212,6 +299,9 @@
                 msgSimStart: "🚀 啟動純數學模擬 {0} 局...請稍候",
                 msgSimDone: "✅ 模擬完成！統計資料已更新。",
                 msgReset: "統計資料與日誌已重置。",
+                btnSettings: "⚙️ Settings",
+                settingsTitle: "⚙️ Model Parameters Settings (Custom)",
+                alertSettingsV2Only: "Settings customization is only supported for Model v2. Please select v2.",
                 rules: `
                     <h2>《Neon Spin》遊玩規則</h2>
                     <h4>1. 遊戲簡介</h4>
@@ -253,6 +343,9 @@
                 msgSimStart: "🚀 Starting pure math simulation for {0} rounds... please wait.",
                 msgSimDone: "✅ Simulation complete! Stats updated.",
                 msgReset: "Statistics and logs have been reset.",
+                btnSettings: "⚙️ Settings",
+                settingsTitle: "⚙️ Model Parameters (Custom)",
+                alertSettingsV2Only: "Settings customization is currently based on Model v2. Please switch to v2 first.",
                 rules: `
                     <h2>Neon Spin Game Rules</h2>
                     <h4>1. Game Overview</h4>
@@ -303,6 +396,8 @@
             document.getElementById('t_boxTitle').innerText = getText('boxTitle');
             document.getElementById('modalCloseBtn').innerText = getText('closeBox');
             document.getElementById('t_rulesClose').innerText = getText('closeRules');
+            document.getElementById('settingsBtn').innerText = getText('btnSettings');
+            document.getElementById('t_settingsTitle').innerText = getText('settingsTitle');
             
             document.getElementById('th_option').innerText = getText('th_op');
             document.getElementById('th_bets').innerText = getText('th_be');
@@ -325,7 +420,7 @@
             document.getElementById('rulesModal').style.display = 'flex';
         }
         function closeRulesModal() { document.getElementById('rulesModal').style.display = 'none'; }
-
+        
         // --- 1. 資料與模型 ---
         const typeNames = { 0: "1x", 1: "2x", 2: "5x", 3: "10x", 4: "Mystery Box" };
         const colors = { 0: "#FFEB3B", 1: "#2196F3", 2: "#E91E63", 3: "#9C27B0", 4: "#00E5FF" };
@@ -336,32 +431,37 @@
                 theoreticalRTP: { 0: 96.48, 1: 96.50, 2: 96.50, 3: 96.51, 4: 96.44 },
                 segments: [21, 14, 7, 4, 8],
                 pools: {
-                    0: { vals: [5, 10, 15, 20, 25, 50], probs: [0.20, 0.21, 0.23, 0.06, 0.28, 0.02] },
-                    1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02] },
-                    2: { vals: [10, 15, 25, 50, 100, 250], probs: [0.08, 0.45, 0.23, 0.03, 0.12, 0.09] },
-                    3: { vals: [15, 25, 50, 100, 250, 500], probs: [0.08, 0.58, 0.06, 0.21, 0.01, 0.06] }
+                    0: { vals: [5, 10, 15, 20, 25, 50], probs: [20, 21, 23, 6, 28, 2] },
+                    1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [5, 7, 22, 17, 36, 11, 2] },
+                    2: { vals: [10, 15, 25, 50, 100, 250], probs: [8, 45, 23, 3, 12, 9] },
+                    3: { vals: [15, 25, 50, 100, 250, 500], probs: [8, 58, 6, 21, 1, 6] }
                 },
-                boxA: { vals: [3], probs: [1.0] },
-                boxB: { vals: [4, 6], probs: [0.76, 0.24] },
-                boxC: { vals: [11, 16, 26, 51], probs: [0.88, 0.10, 0.01, 0.01] },
-                getBonusCount: () => Math.random() < 0.5 ? 1 : 2
+                boxA: { vals: [3], probs: [100] },
+                boxB: { vals: [4, 6], probs: [76, 24] },
+                boxC: { vals: [11, 16, 26, 51], probs: [88, 10, 1, 1] },
+                bonusWeights: [50, 50],
+                getBonusCount: function() { return weightedChoice([1, 2], this.bonusWeights); }
             },
             v2: {
                 theoreticalRTP: { 0: 96.76, 1: 97.48, 2: 90.97, 3: 93.64, 4: 96.55 },
                 segments: [24, 15, 7, 4, 4],
                 pools: {
-                    0: { vals: [5, 10, 15, 20, 25, 50], probs: [0.70, 0.12, 0.07, 0.06, 0.03, 0.02] },
-                    1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02] },
-                    2: { vals: [10, 15, 25, 50, 100, 250], probs: [0.10, 0.30, 0.23, 0.19, 0.11, 0.07] },
-                    3: { vals: [15, 25, 50, 100, 250, 500], probs: [0.09, 0.40, 0.18, 0.21, 0.08, 0.04] }
+                    0: { vals: [5, 10, 15, 20, 25, 50], probs: [70, 12, 7, 6, 3, 2] },
+                    1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [5, 7, 22, 17, 36, 11, 2] },
+                    2: { vals: [10, 15, 25, 50, 100, 250], probs: [10, 30, 23, 19, 11, 7] },
+                    3: { vals: [15, 25, 50, 100, 250, 500], probs: [9, 40, 18, 21, 8, 4] }
                 },
-                boxA: { vals: [3, 4, 6, 11], probs: [0.70, 0.20, 0.07, 0.03] },
-                boxB: { vals: [4, 6, 8, 11, 16, 21, 26, 31], probs: [0.44, 0.17, 0.15, 0.10, 0.06, 0.04, 0.03, 0.01] },
-                boxC: { vals: [11, 16, 26, 51, 101, 126, 151, 176, 201, 251], probs: [0.50, 0.24, 0.106, 0.0544, 0.047, 0.021, 0.015, 0.0155, 0.001, 0.0001] },
-                getBonusCount: () => Math.random() < 0.85 ? 1 : 2
+                boxA: { vals: [3, 4, 6, 11], probs: [70, 20, 7, 3] },
+                boxB: { vals: [4, 6, 8, 11, 16, 21, 26, 31], probs: [44, 17, 15, 10, 6, 4, 3, 1] },
+                boxC: { vals: [11, 16, 26, 51, 101, 126, 151, 176, 201, 251], probs: [50, 24, 10.6, 5.44, 4.7, 2.1, 1.5, 1.55, 0.1, 0.01] },
+                bonusWeights: [85, 15],
+                getBonusCount: function() { return weightedChoice([1, 2], this.bonusWeights); }
             }
         };
 
+        // 建立 v2 的預設深拷貝，以利恢復預設
+        const defaultV2ModelStr = JSON.stringify(models.v2);
+        
         let currentModel = models.v1;
         let theoreticalRTP = currentModel.theoreticalRTP;
         let pools = currentModel.pools;
@@ -386,11 +486,155 @@
             drawWheel();
         }
 
+        // --- 自訂設定邏輯 ---
+        function updateSegmentTotal() {
+            let sum = 0;
+            for(let i=0; i<5; i++) sum += parseInt(document.getElementById(`seg${i}`).value || 0);
+            document.getElementById('segmentTotal').innerText = sum;
+        }
+
+        function openSettingsModal() {
+            // 強制使用 models.v2 作為基底 (或者也可以針對任何模型做 deep copy，但由於只有 v2 是客製化的標的)
+            document.getElementById('modelSelect').value = 'v2';
+            changeModel(); // 確保現在處於 v2
+
+            let m = models.v2;
+            for(let i=0; i<5; i++) document.getElementById(`seg${i}`).value = m.segments[i];
+            
+            document.getElementById('bonus1Weight').value = m.bonusWeights ? m.bonusWeights[0] : 85;
+            document.getElementById('bonus2Weight').value = m.bonusWeights ? m.bonusWeights[1] : 15;
+
+            document.getElementById('p0v').value = m.pools[0].vals.join(',');
+            document.getElementById('p0p').value = m.pools[0].probs.join(',');
+            document.getElementById('p1v').value = m.pools[1].vals.join(',');
+            document.getElementById('p1p').value = m.pools[1].probs.join(',');
+            document.getElementById('p2v').value = m.pools[2].vals.join(',');
+            document.getElementById('p2p').value = m.pools[2].probs.join(',');
+            document.getElementById('p3v').value = m.pools[3].vals.join(',');
+            document.getElementById('p3p').value = m.pools[3].probs.join(',');
+
+            document.getElementById('bAv').value = m.boxA.vals.join(',');
+            document.getElementById('bAp').value = m.boxA.probs.join(',');
+            document.getElementById('bBv').value = m.boxB.vals.join(',');
+            document.getElementById('bBp').value = m.boxB.probs.join(',');
+            document.getElementById('bCv').value = m.boxC.vals.join(',');
+            document.getElementById('bCp').value = m.boxC.probs.join(',');
+
+            updateSegmentTotal();
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        function parseNumArray(str) { return str.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n)); }
+
+        function saveSettings() {
+            let m = models.v2;
+            try {
+                for(let i=0; i<5; i++) m.segments[i] = parseInt(document.getElementById(`seg${i}`).value || 0);
+
+                let bw1 = parseFloat(document.getElementById('bonus1Weight').value) || 0;
+                let bw2 = parseFloat(document.getElementById('bonus2Weight').value) || 0;
+                m.bonusWeights = [bw1, bw2];
+
+                m.pools[0].vals = parseNumArray(document.getElementById('p0v').value);
+                m.pools[0].probs = parseNumArray(document.getElementById('p0p').value);
+                m.pools[1].vals = parseNumArray(document.getElementById('p1v').value);
+                m.pools[1].probs = parseNumArray(document.getElementById('p1p').value);
+                m.pools[2].vals = parseNumArray(document.getElementById('p2v').value);
+                m.pools[2].probs = parseNumArray(document.getElementById('p2p').value);
+                m.pools[3].vals = parseNumArray(document.getElementById('p3v').value);
+                m.pools[3].probs = parseNumArray(document.getElementById('p3p').value);
+
+                m.boxA.vals = parseNumArray(document.getElementById('bAv').value);
+                m.boxA.probs = parseNumArray(document.getElementById('bAp').value);
+                m.boxB.vals = parseNumArray(document.getElementById('bBv').value);
+                m.boxB.probs = parseNumArray(document.getElementById('bBp').value);
+                m.boxC.vals = parseNumArray(document.getElementById('bCv').value);
+                m.boxC.probs = parseNumArray(document.getElementById('bCp').value);
+
+                // 客製化後，將理論RTP顯示為 - 以避免誤導
+                m.theoreticalRTP = { 0: '-', 1: '-', 2: '-', 3: '-', 4: '-' };
+                
+                changeModel(); // 重新載入設定
+                closeSettingsModal();
+                alert('Settings saved and applied successfully!');
+            } catch (err) {
+                alert('Failed to save settings. Please ensure all values are correctly formatted.');
+            }
+        }
+
+        function resetSettings() {
+            if(confirm('Reset to Default settings? All your changes will be lost.')) {
+                let defaultM = JSON.parse(defaultV2ModelStr);
+                models.v2.segments = defaultM.segments;
+                models.v2.pools = defaultM.pools;
+                models.v2.boxA = defaultM.boxA;
+                models.v2.boxB = defaultM.boxB;
+                models.v2.boxC = defaultM.boxC;
+                models.v2.theoreticalRTP = defaultM.theoreticalRTP;
+                models.v2.bonusWeights = defaultM.bonusWeights;
+                
+                openSettingsModal(); // 刷新UI
+            }
+        }
+
+        function exportSettings() {
+            let exportObj = {
+                segments: models.v2.segments,
+                pools: models.v2.pools,
+                boxA: models.v2.boxA,
+                boxB: models.v2.boxB,
+                boxC: models.v2.boxC,
+                bonusWeights: models.v2.bonusWeights
+            };
+            
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            let dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "neon_spin_v2_config.json");
+            dlAnchorElem.click();
+        }
+
+        function importSettings(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let imported = JSON.parse(e.target.result);
+                    if (imported.segments && imported.pools) {
+                        models.v2.segments = imported.segments;
+                        models.v2.pools = imported.pools;
+                        models.v2.boxA = imported.boxA || models.v2.boxA;
+                        models.v2.boxB = imported.boxB || models.v2.boxB;
+                        models.v2.boxC = imported.boxC || models.v2.boxC;
+                        
+                        if (imported.bonusWeights) models.v2.bonusWeights = imported.bonusWeights;
+                        models.v2.theoreticalRTP = { 0: '-', 1: '-', 2: '-', 3: '-', 4: '-' }; // Reset theoretical 
+
+                        alert('Configuration successfully imported!');
+                        openSettingsModal(); // Refresh UI
+                        changeModel(); // Apply completely
+                    } else {
+                        alert('Invalid file format!');
+                    }
+                } catch (err) {
+                    alert('Failed to read JSON file. The file may be corrupted.');
+                }
+            };
+            reader.readAsText(file);
+            document.getElementById('importFileInput').value = ''; // Reset file input
+        }
+
+        // --- 2. 轉盤與陣列初始化 ---
         let stats = { bets: {0:0, 1:0, 2:0, 3:0, 4:0}, wins: {0:0, 1:0, 2:0, 3:0, 4:0} };
 
-        function weightedChoice(vals, probs) {
-            let r = Math.random(), sum = 0;
-            for (let i = 0; i < probs.length; i++) { sum += probs[i]; if (r <= sum) return vals[i]; }
+        function weightedChoice(vals, weights) {
+            let sumWeight = weights.reduce((a, b) => a + b, 0);
+            let r = Math.random() * sumWeight, sum = 0;
+            for (let i = 0; i < weights.length; i++) { sum += weights[i]; if (r <= sum) return vals[i]; }
             return vals[vals.length - 1];
         }
 
