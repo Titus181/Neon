@@ -205,6 +205,9 @@
                     </thead>
                     <tbody id="stats-body"></tbody>
                 </table>
+                <div id="rtpDisclaimer" style="text-align: right; font-size: 12px; color: #888; margin-top: 5px;">
+                    ※ 變動後的理論 RTP 僅供數學參考，實際機率佈局仍需進一步覆核。
+                </div>
             </div>
         </div>
     </div>
@@ -302,6 +305,7 @@
                 msgSimStart: "🚀 啟動純數學模擬 {0} 局...請稍候",
                 msgSimDone: "✅ 模擬完成！統計資料已更新。",
                 msgReset: "統計資料與日誌已重置。",
+                rtpDisclaimer: "※ 變動後的理論 RTP 僅供數學參考，實際機率佈局仍需進一步覆核。",
                 btnSettings: "⚙️ Settings",
                 settingsTitle: "⚙️ Model Parameters Settings (Custom)",
                 alertSettingsV2Only: "Settings customization is only supported for Model v2. Please select v2.",
@@ -347,6 +351,7 @@
                 msgSimStart: "🚀 Starting pure math simulation for {0} rounds... please wait.",
                 msgSimDone: "✅ Simulation complete! Stats updated.",
                 msgReset: "Statistics and logs have been reset.",
+                rtpDisclaimer: "※ Modified Theoretical RTP is for mathematical reference only and requires further layout validation.",
                 btnSettings: "⚙️ Settings",
                 settingsTitle: "⚙️ Model Parameters (Custom)",
                 alertSettingsV2Only: "Settings customization is currently based on Model v2. Please switch to v2 first.",
@@ -410,6 +415,7 @@
             document.getElementById('th_wins').innerText = getText('th_wi');
             document.getElementById('th_srtp').innerText = getText('th_srtp');
             document.getElementById('th_trtp').innerText = getText('th_trtp');
+            document.getElementById('rtpDisclaimer').innerText = getText('rtpDisclaimer');
             
             document.getElementById('rulesContentBox').innerHTML = getText('rules');
             updateStatsTable(); // 更新表格以應用翻譯
