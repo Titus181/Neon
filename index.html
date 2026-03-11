@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Spin 綜合模擬器</title>
+    <title>Neon Spin Wheel Simulator</title>
     <style>
         :root {
             --bg-color: #0f0f1b;
@@ -152,8 +152,11 @@
             </select>
             <button class="nav-btn" onclick="toggleLanguage()" id="langBtn">EN / 中文</button>
             <button class="nav-btn" onclick="openRulesModal()" id="rulesBtn">📖 遊戲說明</button>
-            <button class="nav-btn" onclick="openSettingsModal()" id="settingsBtn">⚙️ 參數設定</button>
+            <button class="nav-btn" onclick="openSettingsModal()" id="settingsBtn" style="display:none;">⚙️ 參數設定</button>
         </div>
+    </div>
+    <div id="v1Warning" style="text-align:center; color: var(--neon-pink); font-size: 14px; margin-top:-10px; margin-bottom: 20px; font-weight: bold;">
+        ※ 目前在預設模式 (v1)。如需自訂轉盤參數與機率，請從左上方切換至 Model v2。
     </div>
 
     <div class="layout-container">
@@ -312,12 +315,13 @@
                     <p>在輪盤轉動前，系統會為每局遊戲隨機抽出額外的幸運倍率，並分配到 1 或 2 個常規區塊上。<br>
                     若輪盤最終停在帶有幸運倍率的區塊上，該倍率將會<b>直接取代</b>原先的基礎賠付！</p>
                     <ul>
-                        <li><b>【倍率升級保證】</b>：附加的幸運倍率絕對會「高於」該選項原本的基礎賠率！例如押中 10 倍區塊，幸運倍率保證從 15 倍起跳，確保您贏得更豐厚的獎金！</li>
+                        <li><b>【自訂化】</b>：你可以在 Model v2 中透過設定功能修改 1 或 2 個 Bonus 的出現機率，以及各個下注區（1x, 2x, 5x, 10x）的倍率池大小與權重。</li>
                         <li><b>注意</b>：幸運倍率僅會附加在常規數字上，不會出現在神祕盒區塊上。</li>
                     </ul>
                     <h4>4. 神祕盒獎勵 (Mystery Box Bonus)</h4>
                     <p>當輪盤停在「神祕盒」區塊時，本局有在該選項下注的玩家即可進入神祕盒環節。畫面上將會出現 3 個寶箱。玩家必須在 <b>5 秒內</b>點擊選擇其中 1 個寶箱。若玩家在時間內未做出選擇，系統將會代為隨機挑選 1 個寶箱。<br>
                     每個寶箱內皆藏有不同的高低倍率，打開寶箱後，玩家將根據自己抽中的專屬倍率獲得對應獎金。</p>
+                    <p><b>【自訂化】</b>：在 Model v2 中，三個寶箱內的潛在獎勵與抽中機率一樣可以透過設定介面任意調整，打造不同的高低風險體驗。</p>
                     <h4>5. 基礎賠付表 (Standard Payouts)</h4>
                     <ul>
                         <li>押中 1：賠付 1:1</li>
@@ -356,13 +360,14 @@
                     <p>Before the wheel is spun, extra random multipliers are drawn and distributed to 1 or 2 regular segments each game round.<br>
                     If the wheel stops on a segment with a multiplier, this enhanced multiplier will <b>replace</b> the standard payout value for the selected number.</p>
                     <ul>
-                        <li><b>[Upgrade Guarantee]</b>: The applied lucky multiplier will ALWAYS be strictly higher than the base payout of that segment! For instance, if a multiplier lands on Number 10, it is guaranteed to be 15x or higher, ensuring a much bigger win!</li>
+                        <li><b>[Customizable]</b>: In Model v2, you can use the settings to change the probability weights for 1 or 2 bonuses, as well as customize the multiplier value pools and weights for each normal number (1x, 2x, 5x, 10x).</li>
                         <li><b>Note</b>: Random multipliers do not apply to the Mystery Box segment.</li>
                     </ul>
                     <h4>4. Mystery Box Bonus</h4>
                     <p>Triggered when the wheel stops on the Mystery Box segment. Every player with a valid bet on the Mystery Box in the current game round is eligible to take part.<br>
                     3 chests will appear on the screen. Players have <b>5 seconds</b> to pick 1 chest of their choice. If a player misses the selection time, the system will select one box randomly on their behalf.<br>
                     Each chest contains a hidden multiplier. Players will be rewarded according to the multiplier inside their chosen box.</p>
+                    <p><b>[Customizable]</b>: In Model v2, you can also manually define the potential values and weights for the three different boxes, enabling varying risk/reward profiles.</p>
                     <h4>5. Standard Payouts</h4>
                     <ul>
                         <li>Number 1: Pays 1:1</li>
@@ -398,6 +403,7 @@
             document.getElementById('t_rulesClose').innerText = getText('closeRules');
             document.getElementById('settingsBtn').innerText = getText('btnSettings');
             document.getElementById('t_settingsTitle').innerText = getText('settingsTitle');
+            document.getElementById('v1Warning').innerText = currentLang === 'zh' ? '※ 目前在預設模式 (v1)。如需自訂轉盤參數與機率，請從左上方切換至 Model v2。' : '※ Currently in default Model v1. To define custom segments and multipliers, please switch to Model v2 on the top left.';
             
             document.getElementById('th_option').innerText = getText('th_op');
             document.getElementById('th_bets').innerText = getText('th_be');
@@ -477,6 +483,14 @@
             boxA = currentModel.boxA;
             boxB = currentModel.boxB;
             boxC = currentModel.boxC;
+            
+            if (ver === 'v2') {
+                document.getElementById('settingsBtn').style.display = 'inline-block';
+                document.getElementById('v1Warning').style.display = 'none';
+            } else {
+                document.getElementById('settingsBtn').style.display = 'none';
+                document.getElementById('v1Warning').style.display = 'block';
+            }
             
             rawWheel = [...Array(currentModel.segments[0]).fill(0), ...Array(currentModel.segments[1]).fill(1), ...Array(currentModel.segments[2]).fill(2), ...Array(currentModel.segments[3]).fill(3), ...Array(currentModel.segments[4]).fill(4)];
             wheelSegments = generateDistributedWheel(rawWheel).map(type => ({ type: type, bonus: null, isFlashing: false }));
