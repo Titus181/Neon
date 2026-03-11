@@ -1,0 +1,75 @@
+"Neon Spin Game Rules (English Version)
+
+1. Game Overview
+Neon Spin is a simple, fast-paced lucky wheel game show. The wheel consists of 54 segments , featuring 4 different numbers and a special ""Mystery Box"" segment.
+
+2. How to Play
+Players can place their bets on 5 available options: Number 1, Number 2, Number 5, Number 10, or the Mystery Box.
+Once betting time is over, the presenter will spin the lucky wheel.
+
+3. Lucky Multipliers
+Before the wheel is spun, extra random multipliers are drawn and distributed to 1 or 2 regular segments each game round.
+If the wheel stops on a segment with a multiplier, this enhanced multiplier will replace the standard payout value for the selected number.
+[Upgrade Guarantee]: The applied lucky multiplier will ALWAYS be strictly higher than the base payout of that segment! For instance, if a multiplier lands on Number 10, it is guaranteed to be 15x or higher, ensuring a much bigger win!
+Note: Random multipliers do not apply to the Mystery Box segments.
+
+4. Mystery Box Bonus
+Triggered when the wheel stops on the Mystery Box segment. Every player with a valid bet on the Mystery Box in the current game round is eligible to take part.
+3 chests will appear on the screen. Players have 5 seconds to pick 1 chest of their choice.
+If a player misses the selection time, the system will select one box randomly on their behalf.
+Each chest contains a hidden multiplier. Players will be rewarded according to the multiplier inside their chosen box.
+
+5. Standard Payouts
+Number 1: Pays 1:1
+Number 2: Pays 2:1
+Number 5: Pays 5:1
+Number 10: Pays 10:1
+Mystery Box: Pays according to the revealed multiplier.",,,,,,,,,,,,,,,,,,
+Item (Bet),Total Return (Inc. Bet),Segments,Hit Rate,Base RTP,Bonus RTP,Total RTP,,,,,,,,,,,,
+1x,2,24,44.44%,86.84%,9.92%,96.76%,,,,,,,,,,,,
+2x,3,15,27.78%,81.42%,16.07%,97.48%,,,,,,,,,,,,
+5x,6,7,12.96%,75.99%,14.98%,90.97%,,,,,,,,,,,,
+10x,11,4,7.41%,79.61%,14.03%,93.64%,,,,,,,,,,,,
+Mystery Box,,4,7.41%,,,96.55%,,,,,,,,,,,,
+Total,,54,100.00%,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+Bonus Trigger Mechanics,,,,,,,,,,,,,,,,,,
+Bonus Blocks per Round,Probability,,,,,,,,,,,,,,,,,
+1,85%,,,,,,,,,,,,,,,,,
+2,15%,,,,,,,,,,,,,,,,,
+Expected Value (Blocks per Round),1.15,,,,,,,,,,,,,,,,,
+Bonus Hit Rate per Regular Segment,2.30%,,,,,,,,,,,,,,,,,
+(Note: The probability of a single regular segment receiving a bonus multiplier is calculated as 1.15/50 ≈ 2.30%.),,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+Bonus Distribution Weight Pools,,,,,,,,,,,,,,,,,,
+Bet 1 (Target EV: 15.75),,,,,Pool 2: Bet 2 (Target EV: 24.15),,,,,Pool 3: Bet 5 (Target EV: 49.30),,,,,Pool 4: Bet 10 (Target EV: 72.20),,,
+Multiplier,Weight,Probability,EV Contribution,,Multiplier,Weight,Probability,EV Contribution,,Multiplier,Weight,Probability,EV Contribution,,Multiplier,Weight,Probability,EV Contribution
+5,70,70.0000%,3.5,,5,5,5.0000%,0.25,,10,10,10.0000%,1,,15,9,9.0000%,1.35
+10,12,12.0000%,1.2,,10,7,7.0000%,0.7,,15,30,30.0000%,4.5,,25,40,40.0000%,10
+15,7,7.0000%,1.05,,15,22,22.0000%,3.3,,25,23,23.0000%,5.75,,50,18,18.0000%,9
+20,6,6.0000%,1.2,,20,17,17.0000%,3.4,,50,19,19.0000%,9.5,,100,21,21.0000%,21
+25,3,3.0000%,0.75,,25,36,36.0000%,9,,100,11,11.0000%,11,,250,8,8.0000%,20
+50,2,2.0000%,1,,50,11,11.0000%,5.5,,250,7,7.0000%,17.5,,500,4,4.0000%,20
+100,0,0.0000%,0,,100,2,2.0000%,2,,Total,100,100.0000%,49.25,,Total,100,100.0000%,81.35
+Total,100,100.0000%,8.7,,Total,100,100.0000%,24.15,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+Mystery Box Draw Logic,,,,,,,,,,,,,,,,,,
+"The system independently draws one outcome from Box A, Box B, and Box C based on their respective weights. 
+The three resulting multipliers are then randomly shuffled and concealed within three chests on the UI. 
+The player selects one chest to reveal their final reward.",,,,,,,,,,,,,,,,,,
+Box A: Low Tier (Guaranteed Base),Total Return,Weight,Probability,EV Contribution,,Box B: Medium Tier,Total Return,Weight,Probability,EV Contribution,,Box C: High Tier,Total Return,Weight,Probability,EV Contribution,,
+2x,3,70,70.0000%,3.65,,3x,4,44,44.0000%,1.76,,10x,11,50,50.0000%,5.50,,
+3x,4,20,20.0000%,,,5x,6,17,17.0000%,1.02,,15x,16,24,24.0000%,3.84,,
+5x,6,7,7.0000%,,,7x,8,15,15.0000%,1.2,,25x,26,10.6,10.6000%,2.76,,
+10x,11,3,3.0000%,,,10x,11,10,10.0000%,1.1,,50x,51,5.44,5.4400%,2.77,,
+Total,,100,100.0000%,,,15x,16,6,6.0000%,0.96,,100x,101,4.7,4.7000%,4.75,,
+,,,,,,20x,21,4,4.0000%,0.84,,125x,126,2.1,2.1000%,2.65,,
+,,,,,,25x,26,3,3.0000%,0.78,,150x,151,1.5,1.5000%,2.27,,
+,,,,,,30x,31,1,1.0000%,0.31,,175x,176,1.55,1.5500%,2.73,,
+"Overall Mystery Box Expected Value 
+(Total Return):",13.03416667,,,,,Total,,100,100.0000%,7.97,,200x,201,0.1,0.1000%,0.20,,
+,,,,,,,,,,,,250x,251,0.01,0.0100%,0.03,,
+,,,,,,,,,,,,Total,,100,100.0000%,27.48,,

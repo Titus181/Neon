@@ -121,6 +121,10 @@
     <div class="top-nav">
         <h1>Neon Spin</h1>
         <div class="nav-buttons">
+            <select id="modelSelect" class="nav-btn" onchange="changeModel()" style="background:var(--panel-bg);">
+                <option value="v1">Model v1 (8 Mystery Boxes)</option>
+                <option value="v2">Model v2 (4 Mystery Boxes)</option>
+            </select>
             <button class="nav-btn" onclick="toggleLanguage()" id="langBtn">EN / 中文</button>
             <button class="nav-btn" onclick="openRulesModal()" id="rulesBtn">📖 遊戲說明</button>
         </div>
@@ -326,17 +330,61 @@
         const typeNames = { 0: "1x", 1: "2x", 2: "5x", 3: "10x", 4: "Mystery Box" };
         const colors = { 0: "#FFEB3B", 1: "#2196F3", 2: "#E91E63", 3: "#9C27B0", 4: "#00E5FF" };
         const baseReturns = { 0: 2, 1: 3, 2: 6, 3: 11 };
-        const theoreticalRTP = { 0: 96.48, 1: 96.50, 2: 96.50, 3: 96.51, 4: 96.44 };
         
-        const pools = {
-            0: { vals: [5, 10, 15, 20, 25, 50], probs: [0.20, 0.21, 0.23, 0.06, 0.28, 0.02] },
-            1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02] },
-            2: { vals: [10, 15, 25, 50, 100, 250], probs: [0.08, 0.45, 0.23, 0.03, 0.12, 0.09] },
-            3: { vals: [15, 25, 50, 100, 250, 500], probs: [0.08, 0.58, 0.06, 0.21, 0.01, 0.06] }
+        const models = {
+            v1: {
+                theoreticalRTP: { 0: 96.48, 1: 96.50, 2: 96.50, 3: 96.51, 4: 96.44 },
+                segments: [21, 14, 7, 4, 8],
+                pools: {
+                    0: { vals: [5, 10, 15, 20, 25, 50], probs: [0.20, 0.21, 0.23, 0.06, 0.28, 0.02] },
+                    1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02] },
+                    2: { vals: [10, 15, 25, 50, 100, 250], probs: [0.08, 0.45, 0.23, 0.03, 0.12, 0.09] },
+                    3: { vals: [15, 25, 50, 100, 250, 500], probs: [0.08, 0.58, 0.06, 0.21, 0.01, 0.06] }
+                },
+                boxA: { vals: [3], probs: [1.0] },
+                boxB: { vals: [4, 6], probs: [0.76, 0.24] },
+                boxC: { vals: [11, 16, 26, 51], probs: [0.88, 0.10, 0.01, 0.01] },
+                getBonusCount: () => Math.random() < 0.5 ? 1 : 2
+            },
+            v2: {
+                theoreticalRTP: { 0: 96.76, 1: 97.48, 2: 90.97, 3: 93.64, 4: 96.55 },
+                segments: [24, 15, 7, 4, 4],
+                pools: {
+                    0: { vals: [5, 10, 15, 20, 25, 50], probs: [0.70, 0.12, 0.07, 0.06, 0.03, 0.02] },
+                    1: { vals: [5, 10, 15, 20, 25, 50, 100], probs: [0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02] },
+                    2: { vals: [10, 15, 25, 50, 100, 250], probs: [0.10, 0.30, 0.23, 0.19, 0.11, 0.07] },
+                    3: { vals: [15, 25, 50, 100, 250, 500], probs: [0.09, 0.40, 0.18, 0.21, 0.08, 0.04] }
+                },
+                boxA: { vals: [3, 4, 6, 11], probs: [0.70, 0.20, 0.07, 0.03] },
+                boxB: { vals: [4, 6, 8, 11, 16, 21, 26, 31], probs: [0.44, 0.17, 0.15, 0.10, 0.06, 0.04, 0.03, 0.01] },
+                boxC: { vals: [11, 16, 26, 51, 101, 126, 151, 176, 201, 251], probs: [0.50, 0.24, 0.106, 0.0544, 0.047, 0.021, 0.015, 0.0155, 0.001, 0.0001] },
+                getBonusCount: () => Math.random() < 0.85 ? 1 : 2
+            }
         };
-        const boxA = { vals: [3], probs: [1.0] };
-        const boxB = { vals: [4, 6], probs: [0.76, 0.24] };
-        const boxC = { vals: [11, 16, 26, 51], probs: [0.88, 0.10, 0.01, 0.01] };
+
+        let currentModel = models.v1;
+        let theoreticalRTP = currentModel.theoreticalRTP;
+        let pools = currentModel.pools;
+        let boxA = currentModel.boxA;
+        let boxB = currentModel.boxB;
+        let boxC = currentModel.boxC;
+
+        function changeModel() {
+            let ver = document.getElementById('modelSelect').value;
+            currentModel = models[ver];
+            theoreticalRTP = currentModel.theoreticalRTP;
+            pools = currentModel.pools;
+            boxA = currentModel.boxA;
+            boxB = currentModel.boxB;
+            boxC = currentModel.boxC;
+            
+            rawWheel = [...Array(currentModel.segments[0]).fill(0), ...Array(currentModel.segments[1]).fill(1), ...Array(currentModel.segments[2]).fill(2), ...Array(currentModel.segments[3]).fill(3), ...Array(currentModel.segments[4]).fill(4)];
+            wheelSegments = generateDistributedWheel(rawWheel).map(type => ({ type: type, bonus: null, isFlashing: false }));
+            regularIndices = wheelSegments.map((s, i) => s.type !== 4 ? i : -1).filter(i => i !== -1);
+            
+            resetStats();
+            drawWheel();
+        }
 
         let stats = { bets: {0:0, 1:0, 2:0, 3:0, 4:0}, wins: {0:0, 1:0, 2:0, 3:0, 4:0} };
 
@@ -374,7 +422,7 @@
         }
 
         // --- 2. 轉盤與陣列初始化 ---
-        let rawWheel = [...Array(21).fill(0), ...Array(14).fill(1), ...Array(7).fill(2), ...Array(4).fill(3), ...Array(8).fill(4)];
+        let rawWheel = [...Array(currentModel.segments[0]).fill(0), ...Array(currentModel.segments[1]).fill(1), ...Array(currentModel.segments[2]).fill(2), ...Array(currentModel.segments[3]).fill(3), ...Array(currentModel.segments[4]).fill(4)];
         let wheelSegments = generateDistributedWheel(rawWheel).map(type => ({ type: type, bonus: null, isFlashing: false }));
         let regularIndices = wheelSegments.map((s, i) => s.type !== 4 ? i : -1).filter(i => i !== -1);
 
@@ -465,7 +513,7 @@
             wheelSegments.forEach(s => { s.bonus = null; s.isFlashing = false; });
             drawWheel();
 
-            let numBonuses = Math.random() < 0.5 ? 1 : 2;
+            let numBonuses = currentModel.getBonusCount();
             let targetIndices = shuffle(regularIndices).slice(0, numBonuses);
             
             targetIndices.forEach(idx => {
@@ -570,7 +618,7 @@ function executeRotation(activeBets) {
             
             setTimeout(() => {
                 for (let i = 0; i < rounds; i++) {
-                    let numBonuses = Math.random() < 0.5 ? 1 : 2;
+                    let numBonuses = currentModel.getBonusCount();
                     let bonusTargets = shuffle(regularIndices).slice(0, numBonuses);
                     let resultIdx = Math.floor(Math.random() * 54);
                     let resultType = wheelSegments[resultIdx].type;
