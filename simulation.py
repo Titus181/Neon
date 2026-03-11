@@ -2,27 +2,70 @@ import random
 import time
 import numpy as np
 
-def run_neon_spin_simulation(num_rounds=1_000_000):
-    print(f"🚀 開始執行 Neon Spin 蒙地卡羅模擬 (共 {num_rounds:,} 局)...")
+def run_neon_spin_simulation(num_rounds=1_000_000, model_version="v1"):
+    print(f"🚀 開始執行 Neon Spin 蒙地卡羅模擬 (版本: {model_version.upper()}, 共 {num_rounds:,} 局)...")
     
-    # 1. 建立輪盤 (0: 1x, 1: 2x, 2: 5x, 3: 10x, 4: 神秘盒)
-    wheel = [0]*21 + [1]*14 + [2]*7 + [3]*4 + [4]*8
-    
-    # 找出所有常規區塊的索引 (0~45 是常規區塊，可能被賦予 Bonus)
+    # 根據選擇的模型版本載入設定
+    if model_version == "v1":
+        # === V1 數值模型 (原始版本) ===
+        # 1. 建立輪盤 (0: 1x, 1: 2x, 2: 5x, 3: 10x, 4: 神秘盒) 總計 54 格
+        wheel = [0]*21 + [1]*14 + [2]*7 + [3]*4 + [4]*8
+        
+        # 2. 定義四軌 Bonus 權重池 (倍率陣列, 機率陣列)
+        pools = {
+            0: (np.array([5, 10, 15, 20, 25, 50]), np.array([0.20, 0.21, 0.23, 0.06, 0.28, 0.02])),
+            1: (np.array([5, 10, 15, 20, 25, 50, 100]), np.array([0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02])),
+            2: (np.array([10, 15, 25, 50, 100, 250]), np.array([0.08, 0.45, 0.23, 0.03, 0.12, 0.09])),
+            3: (np.array([15, 25, 50, 100, 250, 500]), np.array([0.08, 0.58, 0.06, 0.21, 0.01, 0.06]))
+        }
+        
+        # 3. Bonus 數量機率
+        num_bonuses_choices = [1, 2]
+        num_bonuses_probs = [0.50, 0.50]
+        
+        # 4. 神祕盒抽獎邏輯 (賠付含本金 Total Return, 機率陣列)
+        box_a = (np.array([3]), np.array([1.0]))
+        box_b = (np.array([4, 6]), np.array([0.76, 0.24]))
+        box_c = (np.array([11, 16, 26, 51]), np.array([0.88, 0.10, 0.01, 0.01]))
+        
+        # 理論 RTP
+        theoretical = [96.48, 96.50, 96.50, 96.51, 96.44]
+
+    elif model_version == "v2":
+        # === V2 數值模型 (4 Mystery Boxes 版本) ===
+        # 1. 建立輪盤 (0: 1x, 1: 2x, 2: 5x, 3: 10x, 4: 神秘盒) 總計 54 格
+        wheel = [0]*24 + [1]*15 + [2]*7 + [3]*4 + [4]*4
+        
+        # 2. 定義四軌 Bonus 權重池 (倍率陣列, 機率陣列 - 依照最新 4 位小數版本更新)
+        pools = {
+            0: (np.array([5, 10, 15, 20, 25, 50]), np.array([0.70, 0.12, 0.07, 0.06, 0.03, 0.02])),
+            1: (np.array([5, 10, 15, 20, 25, 50, 100]), np.array([0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02])),
+            2: (np.array([10, 15, 25, 50, 100, 250]), np.array([0.10, 0.30, 0.23, 0.19, 0.11, 0.07])),
+            3: (np.array([15, 25, 50, 100, 250, 500]), np.array([0.09, 0.40, 0.18, 0.21, 0.08, 0.04]))
+        }
+        
+        # 3. Bonus 數量機率 (1: 85%, 2: 15%)
+        num_bonuses_choices = [1, 2]
+        num_bonuses_probs = [0.85, 0.15]
+        
+        # 4. 神祕盒抽獎邏輯 (賠付含本金 Total Return, 機率陣列)
+        box_a = (np.array([3, 4, 6, 11]), np.array([0.70, 0.20, 0.07, 0.03]))
+        box_b = (np.array([4, 6, 8, 11, 16, 21, 26, 31]), np.array([0.44, 0.17, 0.15, 0.10, 0.06, 0.04, 0.03, 0.01]))
+        
+        # Box C 依照最新版本的精確小數位數設定 (總和為 100.0000%)
+        box_c_probs = np.array([0.50, 0.24, 0.106, 0.0544, 0.047, 0.021, 0.015, 0.0155, 0.001, 0.0001])
+        # 為避免浮點數精度 (如 0.9999999999999999) 導致 numpy 報錯，進行標準化
+        box_c_probs = box_c_probs / box_c_probs.sum()
+        box_c = (np.array([11, 16, 26, 51, 101, 126, 151, 176, 201, 251]), box_c_probs)
+
+        # 理論 RTP
+        theoretical = [96.76, 97.48, 90.97, 93.64, 96.55]
+        
+    else:
+        raise ValueError("不支援的模型版本，請選擇 'v1' 或 'v2'")
+
+    # 找出所有常規區塊的索引
     regular_indices = [i for i, val in enumerate(wheel) if val != 4]
-    
-    # 2. 定義四軌 Bonus 權重池 (倍率陣列, 機率陣列)
-    pools = {
-        0: (np.array([5, 10, 15, 20, 25, 50]), np.array([0.20, 0.21, 0.23, 0.06, 0.28, 0.02])),
-        1: (np.array([5, 10, 15, 20, 25, 50, 100]), np.array([0.05, 0.07, 0.22, 0.17, 0.36, 0.11, 0.02])),
-        2: (np.array([10, 15, 25, 50, 100, 250]), np.array([0.08, 0.45, 0.23, 0.03, 0.12, 0.09])),
-        3: (np.array([15, 25, 50, 100, 250, 500]), np.array([0.08, 0.58, 0.06, 0.21, 0.01, 0.06]))
-    }
-    
-    # 3. 定義神祕盒抽獎邏輯 (賠付含本金 Total Return, 機率陣列)
-    box_a = (np.array([3]), np.array([1.0]))
-    box_b = (np.array([4, 6]), np.array([0.76, 0.24]))
-    box_c = (np.array([11, 16, 26, 51]), np.array([0.88, 0.10, 0.01, 0.01]))
     
     # 統計變數
     bets = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
@@ -35,8 +78,8 @@ def run_neon_spin_simulation(num_rounds=1_000_000):
     last_checkpoint = start_time
 
     for round_num in range(1, num_rounds + 1):
-        # 決定本局 Bonus 數量 (50% 1個, 50% 2個) 與賦予的實體區塊位置
-        num_bonuses = random.choice([1, 2])
+        # 決定本局 Bonus 數量與賦予的實體區塊位置
+        num_bonuses = np.random.choice(num_bonuses_choices, p=num_bonuses_probs)
         bonus_targets = random.sample(regular_indices, num_bonuses)
         
         # 轉動輪盤，決定最終停放的實體區塊
@@ -69,7 +112,7 @@ def run_neon_spin_simulation(num_rounds=1_000_000):
                     chosen_val = random.choice([val_a, val_b, val_c])
                     wins[bet_type] += chosen_val
                     
-        if round_num % 1_000_000_0 == 0:
+        if round_num % 10_000_000 == 0:
             now = time.time()
             segment_time = now - last_checkpoint
             elapsed = now - start_time
@@ -81,7 +124,6 @@ def run_neon_spin_simulation(num_rounds=1_000_000):
 
     # 印出結果對比
     labels = ["Bet 1x", "Bet 2x", "Bet 5x", "Bet 10x", "Mystery Box"]
-    theoretical = [96.48, 96.50, 96.50, 96.51, 96.44]
     
     print("-" * 50)
     print(f"{'下注選項':<12} | {'模擬 RTP':<10} | {'理論 RTP':<10} | {'誤差'}")
@@ -92,5 +134,5 @@ def run_neon_spin_simulation(num_rounds=1_000_000):
         print(f"{labels[i]:<12} | {rtp:>8.4f}% | {theoretical[i]:>8.4f}% | {diff:>+7.4f}%")
     print("-" * 50)
 
-# 執行 1 千萬次模擬
-run_neon_spin_simulation(10_000_000_00)
+# 執行 1 億次模擬 
+run_neon_spin_simulation(100_000_000_0, model_version="v2")

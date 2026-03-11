@@ -343,6 +343,24 @@
             return vals[vals.length - 1];
         }
 
+        function generateDistributedWheel(rawArray) {
+            let counts = {};
+            rawArray.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+            let sortedTypes = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]);
+            let wheel = new Array(rawArray.length).fill(null);
+            sortedTypes.forEach(type => {
+                let count = counts[type];
+                let step = wheel.length / count;
+                let offset = Math.floor(Math.random() * wheel.length);
+                for (let i = 0; i < count; i++) {
+                    let pos = Math.floor(offset + i * step) % wheel.length;
+                    while (wheel[pos] !== null) pos = (pos + 1) % wheel.length;
+                    wheel[pos] = type;
+                }
+            });
+            return wheel;
+        }
+
         function shuffle(array) {
             let arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -354,7 +372,7 @@
 
         // --- 2. 轉盤與陣列初始化 ---
         let rawWheel = [...Array(21).fill(0), ...Array(14).fill(1), ...Array(7).fill(2), ...Array(4).fill(3), ...Array(8).fill(4)];
-        let wheelSegments = shuffle(rawWheel).map(type => ({ type: type, bonus: null, isFlashing: false }));
+        let wheelSegments = generateDistributedWheel(rawWheel).map(type => ({ type: type, bonus: null, isFlashing: false }));
         let regularIndices = wheelSegments.map((s, i) => s.type !== 4 ? i : -1).filter(i => i !== -1);
 
         const canvas = document.getElementById("wheelCanvas");
