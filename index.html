@@ -238,10 +238,10 @@
             </div>
 
             <div class="settings-section">
-                <h4>Bonus Trigger Weights (1 or 2 Bonuses)</h4>
+                <h4>Bonus Trigger Settings (Comma separated values)</h4>
                 <div class="settings-grid">
-                    <div class="setting-item"><label>1 Bonus Weight</label><input type="number" id="bonus1Weight" min="0"></div>
-                    <div class="setting-item"><label>2 Bonus Weight</label><input type="number" id="bonus2Weight" min="0"></div>
+                    <div class="setting-item"><label>Bonus Amounts (Vals)</label><input type="text" id="bonusCounts" placeholder="ex: 1,2"></div>
+                    <div class="setting-item"><label>Bonus Weights</label><input type="text" id="bonusWeights" placeholder="ex: 85,15"></div>
                 </div>
             </div>
 
@@ -445,8 +445,9 @@
                 boxA: { vals: [3], probs: [100] },
                 boxB: { vals: [4, 6], probs: [76, 24] },
                 boxC: { vals: [11, 16, 26, 51], probs: [88, 10, 1, 1] },
+                bonusCounts: [1, 2],
                 bonusWeights: [50, 50],
-                getBonusCount: function() { return weightedChoice([1, 2], this.bonusWeights); }
+                getBonusCount: function() { return weightedChoice(this.bonusCounts, this.bonusWeights); }
             },
             v2: {
                 theoreticalRTP: { 0: 96.76, 1: 97.48, 2: 90.97, 3: 93.64, 4: 96.55 },
@@ -460,8 +461,9 @@
                 boxA: { vals: [3, 4, 6, 11], probs: [70, 20, 7, 3] },
                 boxB: { vals: [4, 6, 8, 11, 16, 21, 26, 31], probs: [44, 17, 15, 10, 6, 4, 3, 1] },
                 boxC: { vals: [11, 16, 26, 51, 101, 126, 151, 176, 201, 251], probs: [50, 24, 10.6, 5.44, 4.7, 2.1, 1.5, 1.55, 0.1, 0.01] },
+                bonusCounts: [1, 2],
                 bonusWeights: [85, 15],
-                getBonusCount: function() { return weightedChoice([1, 2], this.bonusWeights); }
+                getBonusCount: function() { return weightedChoice(this.bonusCounts, this.bonusWeights); }
             }
         };
 
@@ -515,8 +517,8 @@
             let m = models.v2;
             for(let i=0; i<5; i++) document.getElementById(`seg${i}`).value = m.segments[i];
             
-            document.getElementById('bonus1Weight').value = m.bonusWeights ? m.bonusWeights[0] : 85;
-            document.getElementById('bonus2Weight').value = m.bonusWeights ? m.bonusWeights[1] : 15;
+            document.getElementById('bonusCounts').value = m.bonusCounts ? m.bonusCounts.join(',') : '1,2';
+            document.getElementById('bonusWeights').value = m.bonusWeights ? m.bonusWeights.join(',') : '85,15';
 
             document.getElementById('p0v').value = m.pools[0].vals.join(',');
             document.getElementById('p0p').value = m.pools[0].probs.join(',');
@@ -547,9 +549,8 @@
             try {
                 for(let i=0; i<5; i++) m.segments[i] = parseInt(document.getElementById(`seg${i}`).value || 0);
 
-                let bw1 = parseFloat(document.getElementById('bonus1Weight').value) || 0;
-                let bw2 = parseFloat(document.getElementById('bonus2Weight').value) || 0;
-                m.bonusWeights = [bw1, bw2];
+                m.bonusCounts = parseNumArray(document.getElementById('bonusCounts').value);
+                m.bonusWeights = parseNumArray(document.getElementById('bonusWeights').value);
 
                 m.pools[0].vals = parseNumArray(document.getElementById('p0v').value);
                 m.pools[0].probs = parseNumArray(document.getElementById('p0p').value);
@@ -587,6 +588,7 @@
                 models.v2.boxB = defaultM.boxB;
                 models.v2.boxC = defaultM.boxC;
                 models.v2.theoreticalRTP = defaultM.theoreticalRTP;
+                models.v2.bonusCounts = defaultM.bonusCounts;
                 models.v2.bonusWeights = defaultM.bonusWeights;
                 
                 openSettingsModal(); // 刷新UI
@@ -600,6 +602,7 @@
                 boxA: models.v2.boxA,
                 boxB: models.v2.boxB,
                 boxC: models.v2.boxC,
+                bonusCounts: models.v2.bonusCounts,
                 bonusWeights: models.v2.bonusWeights
             };
             
@@ -625,6 +628,7 @@
                         models.v2.boxB = imported.boxB || models.v2.boxB;
                         models.v2.boxC = imported.boxC || models.v2.boxC;
                         
+                        if (imported.bonusCounts) models.v2.bonusCounts = imported.bonusCounts;
                         if (imported.bonusWeights) models.v2.bonusWeights = imported.bonusWeights;
                         models.v2.theoreticalRTP = { 0: '-', 1: '-', 2: '-', 3: '-', 4: '-' }; // Reset theoretical 
 
