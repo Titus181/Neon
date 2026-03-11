@@ -190,7 +190,7 @@
 
     <script>
         // --- 0. 語系與字典 (i18n) ---
-        let currentLang = 'zh'; // 預設中文
+        let currentLang = 'en'; // 預設英文
         
         const i18n = {
             zh: {
@@ -285,9 +285,7 @@
             return str;
         }
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'zh' ? 'en' : 'zh';
-            
+        function applyLanguage() {
             // 更新介面文字
             document.getElementById('langBtn').innerText = currentLang === 'zh' ? 'EN / 中文' : '中文 / EN';
             document.getElementById('rulesBtn').innerText = getText('btnRules');
@@ -310,6 +308,11 @@
             
             document.getElementById('rulesContentBox').innerHTML = getText('rules');
             updateStatsTable(); // 更新表格以應用翻譯
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyLanguage();
         }
 
         // 規則視窗控制
@@ -590,7 +593,7 @@ function executeRotation(activeBets) {
         }
 
         // 初始化語系
-        updateStatsTable();
+        applyLanguage();
     </script>
 </body>
 </html>
