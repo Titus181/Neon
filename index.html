@@ -43,7 +43,7 @@
         }
         .nav-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
 
-        .layout-container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 20px; }
+        .layout-container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 20px; margin-top: 25px; }
         .top-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 40px; }
         
         /* 輪盤區 */
@@ -403,7 +403,7 @@
             document.getElementById('t_rulesClose').innerText = getText('closeRules');
             document.getElementById('settingsBtn').innerText = getText('btnSettings');
             document.getElementById('t_settingsTitle').innerText = getText('settingsTitle');
-            document.getElementById('v1Warning').innerText = currentLang === 'zh' ? '※ 目前在預設模式 (v1)。如需自訂轉盤參數與機率，請從左上方切換至 Model v2。' : '※ Currently in default Model v1. To define custom segments and multipliers, please switch to Model v2 on the top left.';
+            document.getElementById('v1Warning').innerText = currentLang === 'zh' ? '※ 目前在預設模式 (v1)。如需自訂轉盤參數與機率，請從左上方切換至 Model v2。' : '※ Currently in default Model v1. To define custom segments and multipliers, please switch to Model v2 on the top right.';
             
             document.getElementById('th_option').innerText = getText('th_op');
             document.getElementById('th_bets').innerText = getText('th_be');
