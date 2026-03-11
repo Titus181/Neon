@@ -480,6 +480,7 @@
         function changeModel() {
             let ver = document.getElementById('modelSelect').value;
             currentModel = models[ver];
+            if (ver === 'v2') models.v2.theoreticalRTP = calculateTheoreticalRTP(models.v2);
             theoreticalRTP = currentModel.theoreticalRTP;
             pools = currentModel.pools;
             boxA = currentModel.boxA;
@@ -630,7 +631,6 @@
                         
                         if (imported.bonusCounts) models.v2.bonusCounts = imported.bonusCounts;
                         if (imported.bonusWeights) models.v2.bonusWeights = imported.bonusWeights;
-                        models.v2.theoreticalRTP = { 0: '-', 1: '-', 2: '-', 3: '-', 4: '-' }; // Reset theoretical 
 
                         alert('Configuration successfully imported!');
                         openSettingsModal(); // Refresh UI
@@ -642,8 +642,42 @@
                     alert('Failed to read JSON file. The file may be corrupted.');
                 }
             };
-            reader.readAsText(file);
             document.getElementById('importFileInput').value = ''; // Reset file input
+        }
+
+        function calculateTheoreticalRTP(m) {
+            let rtp = { 0: '-', 1: '-', 2: '-', 3: '-', 4: '-' };
+            try {
+                let totalWeights = m.bonusWeights.reduce((a, b) => a + b, 0);
+                let n_reg = m.segments[0] + m.segments[1] + m.segments[2] + m.segments[3];
+                let totalSegments = n_reg + m.segments[4];
+                
+                let E_bonus = 0;
+                let bCounts = m.bonusCounts || [1, 2];
+                for (let i = 0; i < bCounts.length; i++) {
+                    E_bonus += Math.min(bCounts[i], n_reg) * (m.bonusWeights[i] / totalWeights);
+                }
+                let b_p = n_reg > 0 ? E_bonus / n_reg : 0;
+                
+                const baseReturns = { 0: 2, 1: 3, 2: 6, 3: 11 };
+                for (let type = 0; type < 4; type++) {
+                    let p_land = m.segments[type] / totalSegments;
+                    let poolWeights = m.pools[type].probs.reduce((a, b) => a + b, 0);
+                    let E_pool = m.pools[type].vals.reduce((sum, val, idx) => sum + val * (m.pools[type].probs[idx] / poolWeights), 0) + 1;
+                    let E_return = (1 - b_p) * baseReturns[type] + b_p * E_pool;
+                    rtp[type] = (E_return * p_land * 100).toFixed(2);
+                }
+                
+                let p_land_box = m.segments[4] / totalSegments;
+                let getBoxE = (box) => {
+                    let weights = box.probs.reduce((a, b) => a + b, 0);
+                    return box.vals.reduce((sum, val, idx) => sum + val * (box.probs[idx] / weights), 0);
+                }
+                let E_box_avg = (getBoxE(m.boxA) + getBoxE(m.boxB) + getBoxE(m.boxC)) / 3;
+                rtp[4] = (E_box_avg * p_land_box * 100).toFixed(2);
+                
+            } catch(e) { console.error("RTP calculation error", e); }
+            return rtp;
         }
 
         // --- 2. 轉盤與陣列初始化 ---
@@ -756,8 +790,15 @@
             const tbody = document.getElementById('stats-body'); tbody.innerHTML = '';
             for (let i = 0; i < 5; i++) {
                 let rtp = stats.bets[i] > 0 ? ((stats.wins[i] / stats.bets[i]) * 100).toFixed(4) : "0.0000";
+                
+                let theoryHtml = theoreticalRTP[i] + "%";
+                if (currentModel === models.v2) {
+                    let defV2 = JSON.parse(defaultV2ModelStr);
+                    theoryHtml += `<br><span style="font-size:0.85em; color:var(--neon-pink); opacity:0.8;">(Default: ${defV2.theoreticalRTP[i]}%)</span>`;
+                }
+
                 tbody.innerHTML += `
-                    <tr><td>${typeNames[i]}</td><td>${stats.bets[i].toLocaleString()}</td><td>${stats.wins[i].toLocaleString()}</td><td style="color: ${rtp > 90 ? 'var(--neon-green)' : 'inherit'}">${rtp}%</td><td>${theoreticalRTP[i]}%</td></tr>
+                    <tr><td>${typeNames[i]}</td><td>${stats.bets[i].toLocaleString()}</td><td>${stats.wins[i].toLocaleString()}</td><td style="color: ${rtp > 90 ? 'var(--neon-green)' : 'inherit'}">${rtp}%</td><td>${theoryHtml}</td></tr>
                 `;
             }
         }
